@@ -2,7 +2,7 @@ import json
 
 from django.core.management.base import BaseCommand
 
-from foodcartapp.models import Product, ProductCategory
+from foodcartapp.models import Product, ProductCategory, Restaurant, RestaurantMenuItem
 
 
 class Command(BaseCommand):
@@ -31,6 +31,16 @@ class Command(BaseCommand):
             )
             return category_obj
 
+    @staticmethod
+    def add_product_to_menu(product: Product):
+        restaurants = Restaurant.objects.all()
+
+        for restaurant in restaurants:
+            menu_product, created = RestaurantMenuItem.objects.get_or_create(
+                restaurant=restaurant,
+                product=product,
+            )
+
     def add_product(self, product_notes: dict):
         product, created = Product.objects.get_or_create(
             name=product_notes['title'],
@@ -42,6 +52,8 @@ class Command(BaseCommand):
                 'special_status': product_notes.get('special_status', False),
             }
         )
+
+        self.add_product_to_menu(product)
 
         if created:
             self.stdout.write(f'Added product "{product}".')
