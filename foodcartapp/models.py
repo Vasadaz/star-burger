@@ -145,6 +145,8 @@ class Order(models.Model):
     products = models.ManyToManyField(
         Product,
         related_name='orders',
+        through='OrderKit',
+        through_fields=('order', 'product'),
         verbose_name='продукт',
     )
 
@@ -154,3 +156,26 @@ class Order(models.Model):
 
     def __str__(self):
         return f'{self.phonenumber} {self.firstname} {self.lastname}'
+
+
+class OrderKit(models.Model):
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE,
+        verbose_name='заказ',
+    )
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        verbose_name='продукт',
+    )
+    count = models.PositiveSmallIntegerField(
+        verbose_name='количество',
+    )
+
+    class Meta:
+        verbose_name = 'состав заказа'
+        verbose_name_plural = 'составы заказов'
+
+    def __str__(self):
+        return f'В заказе "{self.order}" есть "{self.product}" {self.count} шт.'

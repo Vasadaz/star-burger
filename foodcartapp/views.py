@@ -61,9 +61,10 @@ def product_list_api(request):
     })
 
 
-@api_view(['POST'])
+#@api_view(['POST'])
 def register_order(request):
     order_notes = json.loads(request.body.decode())
+    print(order_notes)
     order = Order(
         phonenumber=order_notes['phonenumber'],
         firstname=order_notes['firstname'],
@@ -73,6 +74,10 @@ def register_order(request):
     order.save()
 
     for note in order_notes['products']:
-        order.products.add(note['product'])
+        product = Product.objects.get(id=note['product'])
+        order.products.add(
+            product,
+            through_defaults={'count' : note['quantity']}
+        )
 
     return JsonResponse(order_notes, json_dumps_params={'ensure_ascii': False})
