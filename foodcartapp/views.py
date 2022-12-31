@@ -61,10 +61,9 @@ def product_list_api(request):
     })
 
 
-#@api_view(['POST'])
+@api_view(['POST'])
 def register_order(request):
     order_notes = json.loads(request.body.decode())
-    print(order_notes)
     order = Order(
         phonenumber=order_notes['phonenumber'],
         firstname=order_notes['firstname'],
