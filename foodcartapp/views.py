@@ -1,5 +1,3 @@
-import phonenumbers
-
 from django.http import JsonResponse
 from django.templatetags.static import static
 from rest_framework.response import Response
@@ -73,15 +71,16 @@ class OrderKitSerializer(ModelSerializer):
 
 
 class OrderSerializer(ModelSerializer):
-    products = OrderKitSerializer(many=True, allow_empty=False)
+    products = OrderKitSerializer(many=True, allow_empty=False, write_only=True)
 
     class Meta:
         model = Order
         fields = [
-            'phonenumber',
+            'id',
             'firstname',
             'lastname',
             'address',
+            'phonenumber',
             'products',
         ]
 
@@ -105,4 +104,4 @@ def register_order(request):
             through_defaults={'count': product['count']}
         )
 
-    return Response({'order_id': order.id})
+    return Response(OrderSerializer(order).data)
