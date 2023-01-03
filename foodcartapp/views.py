@@ -4,8 +4,11 @@ from django.http import JsonResponse
 from django.templatetags.static import static
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
+from rest_framework.serializers import ModelSerializer
+from rest_framework.serializers import IntegerField
 
 from .models import Order
+from .models import OrderKit
 from .models import Product
 
 
@@ -61,58 +64,45 @@ def product_list_api(request):
     })
 
 
+class OrderKitSerializer(ModelSerializer):
+    quantity = IntegerField(source='count')
+
+    class Meta:
+        model = OrderKit
+        fields = ['product', 'quantity']
+
+
+class OrderSerializer(ModelSerializer):
+    products = OrderKitSerializer(many=True, allow_empty=False)
+
+    class Meta:
+        model = Order
+        fields = [
+            'phonenumber',
+            'firstname',
+            'lastname',
+            'address',
+            'products',
+        ]
+
+
 @api_view(['POST'])
 def register_order(request):
-    order_notes = request.data
-
-    def checking_order_field(field: str, field_type: type) -> dict:
-        nonlocal order_notes
-
-        if field not in order_notes:
-            return {'error': f'{field} key not presented'}
-        elif not isinstance(order_notes[field], field_type):
-            return {'error': f'{field} key type is not {field_type}'}
-        elif not order_notes[field]:
-            return {'error': f'{field} key cannot be empty'}
-
-    if products_field_errors := checking_order_field('products', list):
-        return Response(products_field_errors)
-    else:
-        products_ids = Product.objects.values_list('id', flat=True)
-        for product in order_notes['products']:
-            product_id = product['product']
-            if product_id not in products_ids:
-                return Response({'error': f'product ID {product_id} not found'})
-
-    if firstname_field_errors := checking_order_field('firstname', str):
-        return Response(firstname_field_errors)
-
-    if lastname_field_errors := checking_order_field('lastname', str):
-        return Response(lastname_field_errors)
-
-    if phonenumber_field_errors := checking_order_field('phonenumber', str):
-        return Response(phonenumber_field_errors)
-    else:
-        order_phonenumber = phonenumbers.parse(order_notes['phonenumber'], 'RU')
-        if not phonenumbers.is_valid_number(order_phonenumber):
-            return Response({'error': f'phonenumber not valid'})
-
-    if address_field_errors := checking_order_field('address', str):
-        return Response(address_field_errors)
+    order_serializer = OrderSerializer(data=request.data)
+    order_serializer.is_valid(raise_exception=True)
 
     order = Order(
-        phonenumber=order_notes['phonenumber'],
-        firstname=order_notes['firstname'],
-        lastname=order_notes['lastname'],
-        address=order_notes['address'],
+        phonenumber=order_serializer.validated_data['phonenumber'],
+        firstname=order_serializer.validated_data['firstname'],
+        lastname=order_serializer.validated_data['lastname'],
+        address=order_serializer.validated_data['address'],
     )
     order.save()
 
-    for note in order_notes['products']:
-        product = Product.objects.get(id=note['product'])
+    for product in order_serializer.validated_data['products']:
         order.products.add(
-            product,
-            through_defaults={'count': note['quantity']}
+            product['product'],
+            through_defaults={'count': product['count']}
         )
 
-    return Response({'status': 'CREATED', 'order': order_notes})
+    return Response({'order_id': order.id})
