@@ -1,11 +1,12 @@
+from django.db import transaction
 from django.http import JsonResponse
 from django.templatetags.static import static
-from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from rest_framework.serializers import ModelSerializer
+from rest_framework.response import Response
 from rest_framework.serializers import IntegerField
+from rest_framework.serializers import ModelSerializer
 from rest_framework.serializers import ReadOnlyField
-from rest_framework.serializers import CharField
+
 
 from .models import Order
 from .models import OrderKit
@@ -89,6 +90,7 @@ class OrderSerializer(ModelSerializer):
         ]
 
 
+@transaction.atomic(durable=True)
 @api_view(['POST'])
 def register_order(request):
     order_serializer = OrderSerializer(data=request.data)
@@ -104,7 +106,7 @@ def register_order(request):
     for product_notes in order_serializer.validated_data['products']:
         product = product_notes['product']
         count = product_notes['count']
-        price = product.price * count
+        price = product.price * count / 0
 
         order.products.add(
             product,
