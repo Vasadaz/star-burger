@@ -111,13 +111,28 @@ class ProductAdmin(admin.ModelAdmin):
 
 
 class ProductInline(admin.TabularInline):
+
+
     can_delete = False
     model = Product.orders.through
     extra = 0
+    readonly_fields = [
+        'price',
+    ]
 
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
+    def save_formset(self, request, form, formset, change):
+        product = Product.objects.get(id=request.POST['orderkit_set-0-product'])
+        count = int(request.POST['orderkit_set-0-count'])
+        instances = formset.save(commit=False)
+
+        for instance in instances:
+            instance.price = product.price * count
+            instance.save()
+        formset.save_m2m()
+
     inlines = [ProductInline]
     list_display = [
         'phonenumber',

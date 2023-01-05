@@ -124,7 +124,6 @@ class RestaurantMenuItem(models.Model):
         return f'{self.restaurant.name} - {self.product.name}'
 
 
-
 class OrderManager(models.Manager):
     def get_queryset(self):
         product_price = models.F('products__price')
@@ -184,6 +183,12 @@ class OrderKit(models.Model):
     )
     count = models.PositiveSmallIntegerField(
         verbose_name='количество',
+    )
+    price = models.DecimalField(
+        verbose_name='стоимость',
+        max_digits=8,
+        decimal_places=2,
+        validators=[MinValueValidator(0)]
     )
 
     class Meta:

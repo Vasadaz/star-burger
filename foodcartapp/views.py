@@ -101,10 +101,17 @@ def register_order(request):
         address=order_serializer.validated_data['address'],
     )
 
-    for product in order_serializer.validated_data['products']:
+    for product_notes in order_serializer.validated_data['products']:
+        product = product_notes['product']
+        count = product_notes['count']
+        price = product.price * count
+
         order.products.add(
-            product['product'],
-            through_defaults={'count': product['count']}
+            product,
+            through_defaults={
+                'count': count,
+                'price': price,
+            }
         )
 
     return Response(OrderSerializer(order).data)
