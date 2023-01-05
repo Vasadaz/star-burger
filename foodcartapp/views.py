@@ -106,7 +106,7 @@ def register_order(request):
     for product_notes in order_serializer.validated_data['products']:
         product = product_notes['product']
         count = product_notes['count']
-        price = product.price * count / 0
+        price = product.price * count
 
         order.products.add(
             product,
