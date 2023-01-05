@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework.serializers import ModelSerializer
 from rest_framework.serializers import IntegerField
+from rest_framework.serializers import ReadOnlyField
+from rest_framework.serializers import CharField
 
 from .models import Order
 from .models import OrderKit
@@ -71,6 +73,7 @@ class OrderKitSerializer(ModelSerializer):
 
 
 class OrderSerializer(ModelSerializer):
+    price = ReadOnlyField()
     products = OrderKitSerializer(many=True, allow_empty=False, write_only=True)
 
     class Meta:
@@ -82,6 +85,7 @@ class OrderSerializer(ModelSerializer):
             'address',
             'phonenumber',
             'products',
+            'price',
         ]
 
 
@@ -90,13 +94,12 @@ def register_order(request):
     order_serializer = OrderSerializer(data=request.data)
     order_serializer.is_valid(raise_exception=True)
 
-    order = Order(
+    order = Order.objects.create(
         phonenumber=order_serializer.validated_data['phonenumber'],
         firstname=order_serializer.validated_data['firstname'],
         lastname=order_serializer.validated_data['lastname'],
         address=order_serializer.validated_data['address'],
     )
-    order.save()
 
     for product in order_serializer.validated_data['products']:
         order.products.add(

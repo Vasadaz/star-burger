@@ -124,7 +124,20 @@ class RestaurantMenuItem(models.Model):
         return f'{self.restaurant.name} - {self.product.name}'
 
 
+
+class OrderManager(models.Manager):
+    def get_queryset(self):
+        product_price = models.F('products__price')
+        product_count = models.F('orderkit__count')
+
+        return super().get_queryset().annotate(
+            price=models.Sum(product_price * product_count, output_field=models.DecimalField())
+        ).order_by('id')
+
+
 class Order(models.Model):
+    objects = OrderManager()
+
     phonenumber = PhoneNumberField(
         'телефон',
         db_index=True,
