@@ -2,6 +2,8 @@
 
 {% block title %}Необработанные заказы | Star Burger{% endblock %}
 
+{% load admin_urls %}
+
 {% block content %}
   <center>
     <h2>Необработанные заказы</h2>
@@ -18,6 +20,7 @@
       <th>Клиент</th>
       <th>Телефон</th>
       <th>Адрес доставки</th>
+      <th>Ссылка на админку</th>
     </tr>
 
     {% for order in orders %}
@@ -27,6 +30,7 @@
         <td>{{ order.firstname }} {{ order.lastname }}</td>
         <td>{{ order.phonenumber }}</td>
         <td>{{ order.address }}</td>
+        <th><a href="{% url 'admin:foodcartapp_order_change' object_id=order.id %}">Редактировать</a></th>
       </tr>
     {% endfor %}
    </table>
