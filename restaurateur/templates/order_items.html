@@ -29,8 +29,8 @@
         <td>{{ order.price }} руб.</td>
         <td>{{ order.firstname }} {{ order.lastname }}</td>
         <td>{{ order.phonenumber }}</td>
-        <td>{{ order.address }}</td>
-        <th><a href="{% url 'admin:foodcartapp_order_change' object_id=order.id %}" target="_blank">Редактировать</a></th>
+        <td>{{ order.address }} </td>
+        <th><a href="{% url 'admin:foodcartapp_order_change' object_id=order.id %}?next={{ request.path }}">Редактировать</a></th>
       </tr>
     {% endfor %}
    </table>

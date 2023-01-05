@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.shortcuts import reverse
 from django.templatetags.static import static
 from django.utils.html import format_html
+from django.http import HttpResponseRedirect
 
 from .models import Order
 from .models import Product
@@ -111,8 +112,6 @@ class ProductAdmin(admin.ModelAdmin):
 
 
 class ProductInline(admin.TabularInline):
-
-
     can_delete = False
     model = Product.orders.through
     extra = 0
@@ -132,6 +131,13 @@ class OrderAdmin(admin.ModelAdmin):
             instance.price = product.price * count
             instance.save()
         formset.save_m2m()
+
+    def response_post_save_change(self, request, obj):
+        res = super().response_post_save_change(request, obj)
+        if "next" in request.GET:
+            return HttpResponseRedirect(request.GET['next'])
+        else:
+            return res
 
     inlines = [ProductInline]
     list_display = [
