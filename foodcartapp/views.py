@@ -7,7 +7,6 @@ from rest_framework.serializers import IntegerField
 from rest_framework.serializers import ModelSerializer
 from rest_framework.serializers import ReadOnlyField
 
-
 from .models import Order
 from .models import OrderKit
 from .models import Product
@@ -75,6 +74,9 @@ class OrderKitSerializer(ModelSerializer):
 
 class OrderSerializer(ModelSerializer):
     price = ReadOnlyField()
+    status = ReadOnlyField()
+    pay = ReadOnlyField()
+    comment = ReadOnlyField()
     products = OrderKitSerializer(many=True, allow_empty=False, write_only=True)
 
     class Meta:
@@ -86,6 +88,9 @@ class OrderSerializer(ModelSerializer):
             'address',
             'phonenumber',
             'products',
+            'status',
+            'pay',
+            'comment',
             'price',
         ]
 

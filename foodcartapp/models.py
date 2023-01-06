@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator
+from django.utils.timezone import now
 from phonenumber_field.modelfields import PhoneNumberField
 
 
@@ -135,12 +136,38 @@ class OrderManager(models.Manager):
 
 
 class Order(models.Model):
+    STATUS_CHOICES = [
+        ('not processed', 'Необработан'),
+        ('cooking', 'Готовится'),
+        ('on way', 'В пути'),
+        ('delivered', 'Доставлен'),
+    ]
+    PAY_CHOICES = [
+        ('cash', 'Наличными'),
+        ('card', 'Картой'),
+        ('online', 'Онлайн'),
+    ]
+
     objects = OrderManager()
 
     phonenumber = PhoneNumberField(
         'телефон',
         db_index=True,
         region='RU',
+    )
+    status = models.CharField(
+        verbose_name='статус',
+        choices=STATUS_CHOICES,
+        default='not processed',
+        db_index=True,
+        max_length=15,
+    )
+    pay = models.CharField(
+        verbose_name='оплата',
+        choices=PAY_CHOICES,
+        default='cash',
+        db_index=True,
+        max_length=15,
     )
     firstname = models.CharField(
         'имя',
@@ -153,6 +180,27 @@ class Order(models.Model):
     address = models.CharField(
         'адрес доставки',
         max_length=150
+    )
+    comment = models.TextField(
+        verbose_name='комментарий',
+        max_length=500,
+        blank=True,
+    )
+    registered_at = models.DateTimeField(
+        verbose_name='оформлен',
+        default=now,
+        db_index=True,
+        editable=True,
+    )
+    processed_at = models.DateTimeField(
+        verbose_name='обработан',
+        blank=True,
+        null=True,
+    )
+    delivered_at = models.DateTimeField(
+        verbose_name='доставлен',
+        blank=True,
+        null=True,
     )
     products = models.ManyToManyField(
         Product,
