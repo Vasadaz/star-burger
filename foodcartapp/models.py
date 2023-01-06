@@ -1,4 +1,5 @@
 from django.db import models
+from django.forms import ModelChoiceField
 from django.core.validators import MinValueValidator
 from django.utils.timezone import now
 from phonenumber_field.modelfields import PhoneNumberField
@@ -181,11 +182,6 @@ class Order(models.Model):
         'адрес доставки',
         max_length=150
     )
-    comment = models.TextField(
-        verbose_name='комментарий',
-        max_length=500,
-        blank=True,
-    )
     registered_at = models.DateTimeField(
         verbose_name='оформлен',
         default=now,
@@ -196,6 +192,11 @@ class Order(models.Model):
         verbose_name='обработан',
         blank=True,
         null=True,
+    )
+    comment = models.TextField(
+        verbose_name='комментарий',
+        max_length=500,
+        blank=True,
     )
     delivered_at = models.DateTimeField(
         verbose_name='доставлен',
