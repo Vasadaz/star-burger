@@ -128,11 +128,8 @@ class RestaurantMenuItem(models.Model):
 
 class OrderManager(models.Manager):
     def get_queryset(self):
-        product_price = models.F('products__price')
-        product_count = models.F('orderkit__count')
-
         return super().get_queryset().annotate(
-            price=models.Sum(product_price * product_count, output_field=models.DecimalField())
+            price=models.Sum(models.F('orderkit__price'), output_field=models.DecimalField())
         ).order_by('id')
 
 
@@ -198,6 +195,13 @@ class Order(models.Model):
         max_length=500,
         blank=True,
     )
+    restaurant = models.ForeignKey(
+        Restaurant,
+        on_delete=models.SET_NULL,
+        verbose_name='Готовится в ресторане',
+        blank=True,
+        null=True,
+    )
     delivered_at = models.DateTimeField(
         verbose_name='доставлен',
         blank=True,
@@ -239,6 +243,13 @@ class OrderKit(models.Model):
         decimal_places=2,
         validators=[MinValueValidator(0)]
     )
+    restaurants = models.ManyToManyField(
+        Restaurant,
+        verbose_name='где может приготовится',
+        related_name='orders',
+        through='OrderKitRestaurants',
+        through_fields=('order_kit', 'restaurant'),
+    )
 
     class Meta:
         verbose_name = 'состав заказа'
@@ -246,3 +257,26 @@ class OrderKit(models.Model):
 
     def __str__(self):
         return f'В заказе "{self.order}" есть "{self.product}" {self.count} шт.'
+
+class OrderKitRestaurants(models.Model):
+    order_kit = models.ForeignKey(
+        OrderKit,
+        on_delete=models.CASCADE,
+        verbose_name='продукт из заказа',
+    )
+    restaurant = models.ForeignKey(
+        Restaurant,
+        on_delete=models.CASCADE,
+        verbose_name='может приготовить ресторан',
+    )
+    distance_to_client = models.PositiveSmallIntegerField(
+        verbose_name='расстояние до клиента',
+        default=0,
+    )
+
+    class Meta:
+        verbose_name = 'ресторан приготовит продукт из заказа'
+        verbose_name_plural = 'рестораны приготовят продукты из заказа'
+
+    def __str__(self):
+        return f'{self.order_kit.product} в заказе  "{self.order_kit.order}" может приготовить ресторан "{self.restaurant}"'

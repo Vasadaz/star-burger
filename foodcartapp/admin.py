@@ -133,11 +133,11 @@ class OrderAdmin(admin.ModelAdmin):
         formset.save_m2m()
 
     def response_post_save_change(self, request, obj):
-        res = super().response_post_save_change(request, obj)
+        response = super().response_post_save_change(request, obj)
         if "next" in request.GET:
             return HttpResponseRedirect(request.GET['next'])
         else:
-            return res
+            return response
 
     inlines = [ProductInline]
     list_display = [

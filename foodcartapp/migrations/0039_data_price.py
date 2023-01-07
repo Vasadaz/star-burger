@@ -4,7 +4,7 @@ import django.core.validators
 from django.db import migrations, models
 
 
-def move_flat_owners_to_owner(apps, schema_editor):
+def add_price_to_order_kit(apps, schema_editor):
     OrderKit = apps.get_model('foodcartapp', 'OrderKit')
     for order_kit in OrderKit.objects.iterator():
         product = order_kit.product
@@ -32,5 +32,5 @@ class Migration(migrations.Migration):
             field=models.DecimalField(decimal_places=2, default=0, max_digits=8, validators=[django.core.validators.MinValueValidator(0)], verbose_name='стоимость'),
             preserve_default=False,
         ),
-        migrations.RunPython(move_flat_owners_to_owner, rollback),
+        migrations.RunPython(add_price_to_order_kit, rollback),
     ]
