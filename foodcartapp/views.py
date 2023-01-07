@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.db.models import Q
 from django.http import JsonResponse
 from django.templatetags.static import static
 from rest_framework.decorators import api_view
@@ -10,7 +11,7 @@ from rest_framework.serializers import ReadOnlyField
 from .models import Order
 from .models import OrderKit
 from .models import Product
-
+from .models import Restaurant
 
 def banners_list_api(request):
     # FIXME move data to db?
@@ -112,7 +113,12 @@ def register_order(request):
         product = product_notes['product']
         count = product_notes['count']
         price = product.price * count
-
+        restaurants = Restaurant.objects.filter(
+            Q(menu_items__product=product)
+            &
+            Q(menu_items__availability=True)
+        )
+        print(restaurants)
         order.products.add(
             product,
             through_defaults={
@@ -120,5 +126,9 @@ def register_order(request):
                 'price': price,
             }
         )
+        order_kit = order.products.through.objects.get(Q(order=order) & Q(product=product))
+
+        for restaurant in restaurants:
+            order_kit.restaurants.add(restaurant)
 
     return Response(OrderSerializer(order).data)

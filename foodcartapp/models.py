@@ -132,6 +132,21 @@ class OrderManager(models.Manager):
             price=models.Sum(models.F('orderkit__price'), output_field=models.DecimalField())
         ).order_by('id')
 
+    def update_restaurants(self):
+        orders = super().get_queryset().filter(restaurant=None)
+        for order in orders:
+            for order_kit in order.products.through.objects.filter(order=order):
+                order_kit.restaurants.clear()
+
+                restaurants = Restaurant.objects.filter(
+                    models.Q(menu_items__product=order_kit.product)
+                    &
+                    models.Q(menu_items__availability=True)
+                )
+
+                for restaurant in restaurants:
+                    order_kit.restaurants.add(restaurant)
+
 
 class Order(models.Model):
     STATUS_CHOICES = [
@@ -257,6 +272,7 @@ class OrderKit(models.Model):
 
     def __str__(self):
         return f'В заказе "{self.order}" есть "{self.product}" {self.count} шт.'
+
 
 class OrderKitRestaurants(models.Model):
     order_kit = models.ForeignKey(
