@@ -1,3 +1,6 @@
+import requests
+
+from environs import Env
 from django.db import transaction
 from django.db.models import Q
 from django.http import JsonResponse
@@ -36,6 +39,23 @@ def banners_list_api(request):
         'indent': 4,
     })
 
+
+def fetch_coordinates(apikey, address):
+    base_url = "https://geocode-maps.yandex.ru/1.x"
+    response = requests.get(base_url, params={
+        "geocode": address,
+        "apikey": apikey,
+        "format": "json",
+    })
+    response.raise_for_status()
+    found_places = response.json()['response']['GeoObjectCollection']['featureMember']
+
+    if not found_places:
+        return None
+
+    most_relevant = found_places[0]
+    lon, lat = most_relevant['GeoObject']['Point']['pos'].split(" ")
+    return lon, lat
 
 def product_list_api(request):
     products = Product.objects.select_related('category').available()
@@ -99,6 +119,9 @@ class OrderSerializer(ModelSerializer):
 @transaction.atomic(durable=True)
 @api_view(['POST'])
 def register_order(request):
+    env = Env()
+    env.read_env()
+    yandex_api = env.str('YANDEX_GEO_API')
     order_serializer = OrderSerializer(data=request.data)
     order_serializer.is_valid(raise_exception=True)
 
@@ -109,16 +132,13 @@ def register_order(request):
         address=order_serializer.validated_data['address'],
     )
 
+    print(fetch_coordinates(yandex_api, order.address))
+
     for product_notes in order_serializer.validated_data['products']:
         product = product_notes['product']
         count = product_notes['count']
         price = product.price * count
-        restaurants = Restaurant.objects.filter(
-            Q(menu_items__product=product)
-            &
-            Q(menu_items__availability=True)
-        )
-        print(restaurants)
+        restaurants = Restaurant.objects.all()
         order.products.add(
             product,
             through_defaults={
@@ -129,6 +149,11 @@ def register_order(request):
         order_kit = order.products.through.objects.get(Q(order=order) & Q(product=product))
 
         for restaurant in restaurants:
-            order_kit.restaurants.add(restaurant)
+            order_kit.restaurants.add(
+                restaurant,
+                through_defaults={
+                    'distance_to_client': count,
+                }
+            )
 
     return Response(OrderSerializer(order).data)
