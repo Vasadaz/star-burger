@@ -299,9 +299,8 @@ class OrderKitRestaurants(models.Model):
         on_delete=models.CASCADE,
         verbose_name='может приготовить ресторан',
     )
-    distance_to_client = models.PositiveSmallIntegerField(
-        verbose_name='расстояние до клиента',
-        default=0,
+    distance_to_client = models.PositiveIntegerField(
+        verbose_name='расстояние до клиента (м)',
     )
 
     class Meta:
@@ -309,4 +308,4 @@ class OrderKitRestaurants(models.Model):
         verbose_name_plural = 'рестораны приготовят продукты из заказа'
 
     def __str__(self):
-        return f'{self.order_kit.product} в заказе  "{self.order_kit.order}" может приготовить ресторан "{self.restaurant}"'
+        return f'{self.restaurant} - {self.distance_to_client} м'
