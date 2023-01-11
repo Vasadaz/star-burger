@@ -20,6 +20,20 @@ class Restaurant(models.Model):
         max_length=50,
         blank=True,
     )
+    lat = models.DecimalField(
+        verbose_name='широта',
+        decimal_places=6,
+        editable=False,
+        max_digits=8,
+        null=True,
+    )
+    lon = models.DecimalField(
+        verbose_name='долгота',
+        decimal_places=6,
+        editable=False,
+        max_digits=8,
+        null=True,
+    )
 
     class Meta:
         verbose_name = 'ресторан'
