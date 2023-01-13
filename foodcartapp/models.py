@@ -224,6 +224,14 @@ class Order(models.Model):
         max_length=500,
         blank=True,
     )
+    restaurants = models.ManyToManyField(
+        Restaurant,
+        verbose_name='где может приготовится',
+        related_name='orders',
+        through='OrderRestaurants',
+        through_fields=('order', 'restaurant'),
+        editable=False,
+    )
     restaurant = models.ForeignKey(
         Restaurant,
         on_delete=models.SET_NULL,
@@ -272,13 +280,6 @@ class OrderKit(models.Model):
         decimal_places=2,
         validators=[MinValueValidator(0)]
     )
-    restaurants = models.ManyToManyField(
-        Restaurant,
-        verbose_name='где может приготовится',
-        related_name='orders',
-        through='OrderKitRestaurants',
-        through_fields=('order_kit', 'restaurant'),
-    )
 
     class Meta:
         verbose_name = 'состав заказа'
@@ -288,11 +289,11 @@ class OrderKit(models.Model):
         return f'В заказе "{self.order}" есть "{self.product}" {self.count} шт.'
 
 
-class OrderKitRestaurants(models.Model):
-    order_kit = models.ForeignKey(
-        OrderKit,
+class OrderRestaurants(models.Model):
+    order = models.ForeignKey(
+        Order,
         on_delete=models.CASCADE,
-        verbose_name='продукт из заказа',
+        verbose_name='заказ',
     )
     restaurant = models.ForeignKey(
         Restaurant,
@@ -304,6 +305,7 @@ class OrderKitRestaurants(models.Model):
     )
 
     class Meta:
+        ordering = ['distance_to_client']
         verbose_name = 'ресторан приготовит продукт из заказа'
         verbose_name_plural = 'рестораны приготовят продукты из заказа'
 

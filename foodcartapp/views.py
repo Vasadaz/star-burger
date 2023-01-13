@@ -162,10 +162,9 @@ def register_order(request):
                 'price': price,
             }
         )
-        order_kit = order.products.through.objects.get(Q(order=order) & Q(product=product))
 
         for restaurant in restaurants:
-            order_kit.restaurants.add(
+            order.restaurants.add(
                 restaurant['obj'],
                 through_defaults={
                     'distance_to_client': restaurant['distance_to_client'],
