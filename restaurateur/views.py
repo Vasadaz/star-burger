@@ -91,6 +91,9 @@ def view_restaurants(request):
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
+    Order.objects.check_status()
+    Order.objects.update_restaurants()
+
     return render(request, template_name='order_items.html', context={
         'orders': Order.objects.all(),
     })

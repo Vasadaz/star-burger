@@ -163,12 +163,10 @@ def register_order(request):
             }
         )
 
-        for restaurant in restaurants:
-            order.restaurants.add(
-                restaurant['obj'],
-                through_defaults={
-                    'distance_to_client': restaurant['distance_to_client'],
-                }
-            )
+    for restaurant in restaurants:
+        order.restaurants.create(
+            restaurant=restaurant['obj'],
+            distance_to_client=restaurant['distance_to_client']
+        )
 
     return Response(OrderSerializer(order).data)

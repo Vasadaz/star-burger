@@ -1,5 +1,4 @@
 from django.db import models
-from django.forms import ModelChoiceField
 from django.core.validators import MinValueValidator
 from django.utils.timezone import now
 from phonenumber_field.modelfields import PhoneNumberField
@@ -96,7 +95,7 @@ class Product(models.Model):
     )
     description = models.TextField(
         'описание',
-        max_length=200,
+        max_length=300,
         blank=True,
     )
 
@@ -144,38 +143,46 @@ class OrderManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().annotate(
             price=models.Sum(models.F('orderkit__price'), output_field=models.DecimalField())
-        ).order_by('id')
+        ).order_by('status', 'id')
+
+    def check_status(self):
+        orders = self.filter(restaurant__in=Restaurant.objects.all(), status='1 not processed')
+        print('status')
+        for order in orders:
+            print('\t', order)
+            order.status = '2 cooking'
+            order.save()
 
     def update_restaurants(self):
-        orders = super().get_queryset().filter(restaurant=None)
-        for order in orders:
-            for order_kit in order.products.through.objects.filter(order=order):
-                order_kit.restaurants.clear()
+        for order in self.filter(restaurant=None):
+            order_products_ids = set(order.products.all().values_list('id', flat=True))
 
-                restaurants = Restaurant.objects.filter(
-                    models.Q(menu_items__product=order_kit.product)
-                    &
-                    models.Q(menu_items__availability=True)
-                )
+            for restaurant in Restaurant.objects.iterator():
+                restaurant_products_ids = set(restaurant.menu_items.filter(
+                    availability=True,
+                ).values_list('product__id', flat=True))
+                restaurant = order.restaurants.get(restaurant=restaurant)
+                verified_products_ids = order_products_ids & restaurant_products_ids
 
-                for restaurant in restaurants:
-                    order_kit.restaurants.add(restaurant)
+                if order_products_ids == verified_products_ids:
+                    restaurant.availability_all_products = True
+                else:
+                    restaurant.availability_all_products = False
+                restaurant.save()
 
 
 class Order(models.Model):
     STATUS_CHOICES = [
-        ('not processed', 'Необработан'),
-        ('cooking', 'Готовится'),
-        ('on way', 'В пути'),
-        ('delivered', 'Доставлен'),
+        ('1 not processed', 'Необработан'),
+        ('2 cooking', 'Готовится'),
+        ('3 on way', 'В пути'),
+        ('4 delivered', 'Доставлен'),
     ]
     PAY_CHOICES = [
         ('cash', 'Наличными'),
         ('card', 'Картой'),
         ('online', 'Онлайн'),
     ]
-
-    objects = OrderManager()
 
     phonenumber = PhoneNumberField(
         'телефон',
@@ -185,7 +192,7 @@ class Order(models.Model):
     status = models.CharField(
         verbose_name='статус',
         choices=STATUS_CHOICES,
-        default='not processed',
+        default=STATUS_CHOICES[0][0],
         db_index=True,
         max_length=15,
     )
@@ -224,14 +231,6 @@ class Order(models.Model):
         max_length=500,
         blank=True,
     )
-    restaurants = models.ManyToManyField(
-        Restaurant,
-        verbose_name='где может приготовится',
-        related_name='orders',
-        through='OrderRestaurants',
-        through_fields=('order', 'restaurant'),
-        editable=False,
-    )
     restaurant = models.ForeignKey(
         Restaurant,
         on_delete=models.SET_NULL,
@@ -251,6 +250,8 @@ class Order(models.Model):
         through_fields=('order', 'product'),
         verbose_name='продукт',
     )
+
+    objects = OrderManager()
 
     class Meta:
         verbose_name = 'заказ'
@@ -289,20 +290,34 @@ class OrderKit(models.Model):
         return f'В заказе "{self.order}" есть "{self.product}" {self.count} шт.'
 
 
+class OrderRestaurantsQuerySet(models.QuerySet):
+    def available(self):
+        return self.filter(availability_all_products=True)
+
+
 class OrderRestaurants(models.Model):
     order = models.ForeignKey(
         Order,
         on_delete=models.CASCADE,
         verbose_name='заказ',
+        related_name='restaurants',
     )
     restaurant = models.ForeignKey(
         Restaurant,
         on_delete=models.CASCADE,
         verbose_name='может приготовить ресторан',
+        related_name='verified_orders'
     )
     distance_to_client = models.PositiveIntegerField(
         verbose_name='расстояние до клиента (м)',
     )
+    availability_all_products = models.BooleanField(
+        'в продаже все продукты',
+        default=False,
+        db_index=True
+    )
+
+    objects = OrderRestaurantsQuerySet.as_manager()
 
     class Meta:
         ordering = ['distance_to_client']

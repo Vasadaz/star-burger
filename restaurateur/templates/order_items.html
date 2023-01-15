@@ -37,7 +37,23 @@
         <td>{{ order.phonenumber }}</td>
         <td>{{ order.address }} </td>
         <td>{{ order.comment }}</td>
-        <td> - </td>
+        {% if order.restaurant %}
+          <td>{{ order.restaurant }}</td>
+        {% elif order.restaurants.available %}
+          <td>
+            <details>
+              <summary>Может приготовить:</summary>
+                <ul>
+                  {% for restaurant in order.restaurants.available %}
+                    <li>{{restaurant}}</li>
+                  {% endfor %}
+                </ul>
+            </details>
+          </td>
+        {% else %}
+          <td> Ни один ресторан не может приготовить заказ </td>
+        {% endif %}
+
         <th><a href="{% url 'admin:foodcartapp_order_change' object_id=order.id %}?next={{ request.path }}">Редактировать</a></th>
       </tr>
     {% endfor %}

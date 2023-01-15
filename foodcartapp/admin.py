@@ -1,8 +1,10 @@
 from django.contrib import admin
+from django.db.models import Q
+from django.http import HttpResponseRedirect
 from django.shortcuts import reverse
 from django.templatetags.static import static
 from django.utils.html import format_html
-from django.http import HttpResponseRedirect
+
 
 from .models import Order
 from .models import Product
@@ -122,6 +124,16 @@ class ProductInline(admin.TabularInline):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super(OrderAdmin, self).get_form(request, obj, **kwargs)
+        form.base_fields['restaurant'].queryset = Restaurant.objects.filter(
+            Q(verified_orders__order=obj)
+            &
+            Q(verified_orders__availability_all_products=True)
+        ).order_by('verified_orders__distance_to_client')
+        return form
+
     def save_formset(self, request, form, formset, change):
         product = Product.objects.get(id=request.POST['orderkit_set-0-product'])
         count = int(request.POST['orderkit_set-0-count'])
