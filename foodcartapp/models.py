@@ -192,7 +192,7 @@ class Order(models.Model):
     status = models.CharField(
         verbose_name='статус',
         choices=STATUS_CHOICES,
-        default=STATUS_CHOICES[0][0],
+        default='1 not processed',
         db_index=True,
         max_length=15,
     )
