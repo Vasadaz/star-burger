@@ -135,8 +135,13 @@ class OrderAdmin(admin.ModelAdmin):
         return form
 
     def save_formset(self, request, form, formset, change):
-        product = Product.objects.get(id=request.POST['orderkit_set-0-product'])
-        count = int(request.POST['orderkit_set-0-count'])
+        try:
+            product = Product.objects.get(id=request.POST['orderkit_set-0-product'])
+            count = int(request.POST['orderkit_set-0-count'])
+        except KeyError:
+            product = Product.objects.get(id=request.POST['orderkit-0-product'])
+            count = int(request.POST['orderkit-0-count'])
+
         instances = formset.save(commit=False)
 
         for instance in instances:
