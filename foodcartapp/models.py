@@ -178,7 +178,7 @@ class Order(models.Model):
         ('3 on way', 'В пути'),
         ('4 delivered', 'Доставлен'),
     ]
-    PAY_CHOICES = [
+    PAYMENT_CHOICES = [
         ('cash', 'Наличными'),
         ('card', 'Картой'),
         ('online', 'Онлайн'),
@@ -196,9 +196,9 @@ class Order(models.Model):
         db_index=True,
         max_length=15,
     )
-    pay = models.CharField(
+    payment = models.CharField(
         verbose_name='оплата',
-        choices=PAY_CHOICES,
+        choices=PAYMENT_CHOICES,
         default='cash',
         db_index=True,
         max_length=15,
