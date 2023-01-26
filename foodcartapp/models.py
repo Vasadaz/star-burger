@@ -266,11 +266,13 @@ class OrderKit(models.Model):
         Order,
         on_delete=models.CASCADE,
         verbose_name='заказ',
+        related_name='orderkit'
     )
     product = models.ForeignKey(
         Product,
         on_delete=models.CASCADE,
         verbose_name='продукт',
+        related_name='orderkit'
     )
     count = models.PositiveSmallIntegerField(
         verbose_name='количество',
