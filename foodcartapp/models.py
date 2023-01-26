@@ -230,7 +230,7 @@ class Order(models.Model):
         verbose_name='комментарий',
         blank=True,
     )
-    restaurant = models.ForeignKey(
+    preparing_restaurant = models.ForeignKey(
         Restaurant,
         on_delete=models.SET_NULL,
         verbose_name='Готовится в ресторане',
