@@ -228,7 +228,6 @@ class Order(models.Model):
     )
     comment = models.TextField(
         verbose_name='комментарий',
-        max_length=500,
         blank=True,
     )
     restaurant = models.ForeignKey(
