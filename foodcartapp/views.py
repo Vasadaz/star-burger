@@ -1,9 +1,7 @@
 import requests
 
-from environs import Env
 from geopy import distance
 from django.db import transaction
-from django.db.models import Q
 from django.http import JsonResponse
 from django.templatetags.static import static
 from rest_framework.decorators import api_view
@@ -101,7 +99,7 @@ class OrderKitSerializer(ModelSerializer):
 class OrderSerializer(ModelSerializer):
     price = ReadOnlyField()
     status = ReadOnlyField()
-    pay = ReadOnlyField()
+    payment = ReadOnlyField()
     comment = ReadOnlyField()
     products = OrderKitSerializer(many=True, allow_empty=False, write_only=True)
 
@@ -115,7 +113,7 @@ class OrderSerializer(ModelSerializer):
             'phonenumber',
             'products',
             'status',
-            'pay',
+            'payment',
             'comment',
             'price',
         ]
