@@ -16,6 +16,7 @@ from .models import Order
 from .models import OrderKit
 from .models import Product
 from .models import Restaurant
+from star_burger.settings import YANDEX_GEO_API
 
 
 def banners_list_api(request):
@@ -123,10 +124,6 @@ class OrderSerializer(ModelSerializer):
 @transaction.atomic(durable=True)
 @api_view(['POST'])
 def register_order(request):
-    env = Env()
-    env.read_env()
-    yandex_api = env.str('YANDEX_GEO_API')
-
     order_serializer = OrderSerializer(data=request.data)
     order_serializer.is_valid(raise_exception=True)
 
@@ -137,12 +134,12 @@ def register_order(request):
         address=order_serializer.validated_data['address'],
     )
 
-    client_coordinates = fetch_coordinates(yandex_api, order.address)
+    client_coordinates = fetch_coordinates(YANDEX_GEO_API, order.address)
 
     restaurants = []
     for restaurant in Restaurant.objects.iterator():
         if not restaurant.lat or not restaurant.lon:
-            lat, lon = fetch_coordinates(yandex_api, restaurant.address)
+            lat, lon = fetch_coordinates(YANDEX_GEO_API, restaurant.address)
             restaurant.lat = lat
             restaurant.lon = lon
             restaurant.save()
