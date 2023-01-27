@@ -127,7 +127,7 @@ class OrderAdmin(admin.ModelAdmin):
 
     def get_form(self, request, obj=None, **kwargs):
         form = super(OrderAdmin, self).get_form(request, obj, **kwargs)
-        form.base_fields['restaurant'].queryset = Restaurant.objects.filter(
+        form.base_fields['preparing_restaurant'].queryset = Restaurant.objects.filter(
             Q(verified_orders__order=obj)
             &
             Q(verified_orders__availability_all_products=True)
