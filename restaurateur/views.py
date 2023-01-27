@@ -95,5 +95,5 @@ def view_orders(request):
     Order.objects.update_restaurants()
 
     return render(request, template_name='order_items.html', context={
-        'orders': Order.objects.all(),
+        'orders': Order.objects.exclude(status='4 delivered'),
     })
