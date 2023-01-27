@@ -146,15 +146,10 @@ class OrderManager(models.Manager):
         ).order_by('status', 'id')
 
     def check_status(self):
-        orders = self.filter(restaurant__in=Restaurant.objects.all(), status='1 not processed')
-        print('status')
-        for order in orders:
-            print('\t', order)
-            order.status = '2 cooking'
-            order.save()
+        self.filter(preparing_restaurant__isnull=False, status='1 not processed').update(status='2 cooking')
 
     def update_restaurants(self):
-        for order in self.filter(restaurant=None):
+        for order in self.filter(preparing_restaurant__isnull=True):
             order_products_ids = set(order.products.all().values_list('id', flat=True))
 
             for restaurant in Restaurant.objects.iterator():
@@ -164,10 +159,8 @@ class OrderManager(models.Manager):
                 restaurant = order.restaurants.get(restaurant=restaurant)
                 verified_products_ids = order_products_ids & restaurant_products_ids
 
-                if order_products_ids == verified_products_ids:
-                    restaurant.availability_all_products = True
-                else:
-                    restaurant.availability_all_products = False
+                restaurant.availability_all_products = order_products_ids == verified_products_ids
+
                 restaurant.save()
 
 
