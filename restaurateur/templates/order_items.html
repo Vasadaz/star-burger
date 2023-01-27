@@ -37,8 +37,8 @@
         <td>{{ order.phonenumber }}</td>
         <td>{{ order.address }} </td>
         <td>{{ order.comment }}</td>
-        {% if order.restaurant %}
-          <td>{{ order.restaurant }}</td>
+        {% if order.preparing_restaurant %}
+          <td>{{ order.preparing_restaurant }}</td>
         {% elif order.restaurants.available %}
           <td>
             <details>
