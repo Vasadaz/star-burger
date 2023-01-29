@@ -134,15 +134,15 @@ def register_order(request):
 
     client_coordinates = fetch_coordinates(YANDEX_GEO_API, order.address)
 
-    order_restaurants = []
+    distance_to_restaurants = []
     for restaurant in Restaurant.objects.iterator():
         if not restaurant.lat or not restaurant.lon:
             lat, lon = fetch_coordinates(YANDEX_GEO_API, restaurant.address)
             restaurant.lat = lat
             restaurant.lon = lon
             restaurant.save()
-        order_restaurants.append({
-            'obj': restaurant,
+        distance_to_restaurants.append({
+            'restaurant': restaurant,
             'distance_to_client': distance.distance((restaurant.lat, restaurant.lon), client_coordinates).m,
         })
 
@@ -158,10 +158,10 @@ def register_order(request):
             }
         )
 
-    for order_restaurant in order_restaurants:
-        order.restaurants.create(
-            restaurant=order_restaurant['obj'],
-            distance_to_client=order_restaurant['distance_to_client']
+    for distance_to_restaurant in distance_to_restaurants:
+        order.distance_to_restaurants.create(
+            restaurant=distance_to_restaurant['restaurant'],
+            distance_to_client=distance_to_restaurant['distance_to_client']
         )
 
     return Response(OrderSerializer(order).data)

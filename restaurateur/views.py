@@ -92,8 +92,26 @@ def view_restaurants(request):
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
     Order.objects.check_status()
-    Order.objects.update_restaurants()
+
+    orders = Order.objects.filter(preparing_restaurant__isnull=True).exclude(status='4 delivered')
+
+    for order in orders:
+        order_products_ids = set(order.products.all().values_list('id', flat=True))
+
+        for restaurant in Restaurant.objects.iterator():
+            restaurant_products_ids = set(restaurant.menu_items.filter(
+                availability=True,
+            ).values_list('product__id', flat=True))
+            restaurant = order.distance_to_restaurants.get(restaurant=restaurant)
+            verified_products_ids = order_products_ids & restaurant_products_ids
+
+            availability = order_products_ids == verified_products_ids
+
+
+
+
+
 
     return render(request, template_name='order_items.html', context={
-        'orders': Order.objects.exclude(status='4 delivered'),
+        'orders': orders,
     })

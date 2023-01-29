@@ -148,21 +148,6 @@ class OrderManager(models.Manager):
     def check_status(self):
         self.filter(preparing_restaurant__isnull=False, status='1 not processed').update(status='2 cooking')
 
-    def update_restaurants(self):
-        for order in self.filter(preparing_restaurant__isnull=True):
-            order_products_ids = set(order.products.all().values_list('id', flat=True))
-
-            for restaurant in Restaurant.objects.iterator():
-                restaurant_products_ids = set(restaurant.menu_items.filter(
-                    availability=True,
-                ).values_list('product__id', flat=True))
-                restaurant = order.restaurants.get(restaurant=restaurant)
-                verified_products_ids = order_products_ids & restaurant_products_ids
-
-                restaurant.availability_all_products = order_products_ids == verified_products_ids
-
-                restaurant.save()
-
 
 class Order(models.Model):
     STATUS_CHOICES = [
@@ -285,34 +270,22 @@ class OrderKit(models.Model):
         return f'В заказе "{self.order}" есть "{self.product}" {self.count} шт.'
 
 
-class OrderRestaurantsQuerySet(models.QuerySet):
-    def available(self):
-        return self.filter(availability_all_products=True)
-
-
-class OrderRestaurants(models.Model):
+class Distance(models.Model):
     order = models.ForeignKey(
         Order,
         on_delete=models.CASCADE,
         verbose_name='заказ',
-        related_name='restaurants',
+        related_name='distance_to_restaurants',
     )
     restaurant = models.ForeignKey(
         Restaurant,
         on_delete=models.CASCADE,
         verbose_name='может приготовить ресторан',
-        related_name='verified_orders'
+        related_name='distance_to_clients'
     )
     distance_to_client = models.PositiveIntegerField(
         verbose_name='расстояние до клиента (м)',
     )
-    availability_all_products = models.BooleanField(
-        'в продаже все продукты',
-        default=False,
-        db_index=True
-    )
-
-    objects = OrderRestaurantsQuerySet.as_manager()
 
     class Meta:
         ordering = ['distance_to_client']

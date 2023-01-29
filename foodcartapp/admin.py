@@ -125,7 +125,8 @@ class ProductInline(admin.TabularInline):
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
 
-    def get_form(self, request, obj=None, **kwargs):
+    """
+    def get_form(self, request, obj=None, **kwargs)
         form = super(OrderAdmin, self).get_form(request, obj, **kwargs)
         form.base_fields['preparing_restaurant'].queryset = Restaurant.objects.filter(
             Q(verified_orders__order=obj)
@@ -133,6 +134,7 @@ class OrderAdmin(admin.ModelAdmin):
             Q(verified_orders__availability_all_products=True)
         ).order_by('verified_orders__distance_to_client')
         return form
+    """
 
     def save_formset(self, request, form, formset, change):
         try:
