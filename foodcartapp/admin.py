@@ -5,7 +5,6 @@ from django.shortcuts import reverse
 from django.templatetags.static import static
 from django.utils.html import format_html
 
-
 from .models import Order
 from .models import Product
 from .models import ProductCategory
@@ -125,18 +124,29 @@ class ProductInline(admin.TabularInline):
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
 
-    """
-    def get_form(self, request, obj=None, **kwargs)
+    def get_form(self, request, obj=None, **kwargs):
+        order_products_ids = set(obj.products.all().values_list('id', flat=True))
+        verified_restaurants = []
+
+        for distance in obj.distance_to_restaurants.filter(order=obj):
+            restaurant_products_ids = set(
+                distance.restaurant.menu_items.filter(availability=True).values_list('product__id', flat=True)
+            )
+
+            if order_products_ids == (order_products_ids & restaurant_products_ids):
+                verified_restaurants.append(distance.restaurant)
+
         form = super(OrderAdmin, self).get_form(request, obj, **kwargs)
         form.base_fields['preparing_restaurant'].queryset = Restaurant.objects.filter(
-            Q(verified_orders__order=obj)
-            &
-            Q(verified_orders__availability_all_products=True)
-        ).order_by('verified_orders__distance_to_client')
+            name__in=verified_restaurants
+        ).order_by('distance_to_clients__distance_to_client')
+
         return form
-    """
 
     def save_formset(self, request, form, formset, change):
+        if 'address' in form.changed_data:
+            pass
+
         try:
             product = Product.objects.get(id=request.POST['orderkit_set-0-product'])
             count = int(request.POST['orderkit_set-0-count'])
