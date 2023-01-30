@@ -1,13 +1,12 @@
 from django import forms
+from django.contrib.auth import authenticate, login
+from django.contrib.auth import views as auth_views
+from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import redirect, render
 from django.views import View
 from django.urls import reverse_lazy
-from django.contrib.auth.decorators import user_passes_test
 
-from django.contrib.auth import authenticate, login
-from django.contrib.auth import views as auth_views
-
-from foodcartapp.models import Product, Restaurant, Order
+from foodcartapp.models import Order, Product, Restaurant
 
 
 class Login(forms.Form):
@@ -97,21 +96,14 @@ def view_orders(request):
 
     for order in orders:
         order_products_ids = set(order.products.all().values_list('id', flat=True))
+        order.verified_distances = []
 
-        for restaurant in Restaurant.objects.iterator():
-            restaurant_products_ids = set(restaurant.menu_items.filter(
-                availability=True,
-            ).values_list('product__id', flat=True))
-            restaurant = order.distance_to_restaurants.get(restaurant=restaurant)
-            verified_products_ids = order_products_ids & restaurant_products_ids
+        for distance in order.distance_to_restaurants.filter(order=order):
+            restaurant_products_ids = set(
+                distance.restaurant.menu_items.filter(availability=True).values_list('product__id', flat=True)
+            )
 
-            availability = order_products_ids == verified_products_ids
+            if order_products_ids == (order_products_ids & restaurant_products_ids):
+                order.verified_distances.append(distance)
 
-
-
-
-
-
-    return render(request, template_name='order_items.html', context={
-        'orders': orders,
-    })
+    return render(request, template_name='order_items.html', context={'orders': orders})

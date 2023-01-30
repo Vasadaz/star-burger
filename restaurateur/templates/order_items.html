@@ -39,12 +39,12 @@
         <td>{{ order.comment }}</td>
         {% if order.preparing_restaurant %}
           <td>{{ order.preparing_restaurant }}</td>
-        {% elif order.distance_to_restaurants.all %}
+        {% elif order.verified_distances %}
           <td>
             <details>
               <summary>Может приготовить:</summary>
                 <ul>
-                  {% for restaurant in order.distance_to_restaurants.all %}
+                  {% for restaurant in order.verified_distances %}
                     <li>{{restaurant}}</li>
                   {% endfor %}
                 </ul>
