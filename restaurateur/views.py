@@ -94,16 +94,4 @@ def view_orders(request):
 
     orders = Order.objects.filter(preparing_restaurant__isnull=True).exclude(status='4 delivered')
 
-    for order in orders:
-        order_products_ids = set(order.products.all().values_list('id', flat=True))
-        order.verified_distances = []
-
-        for distance in order.distance_to_restaurants.filter(order=order):
-            restaurant_products_ids = set(
-                distance.restaurant.menu_items.filter(availability=True).values_list('product__id', flat=True)
-            )
-
-            if order_products_ids == (order_products_ids & restaurant_products_ids):
-                order.verified_distances.append(distance)
-
     return render(request, template_name='order_items.html', context={'orders': orders})
