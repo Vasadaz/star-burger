@@ -125,27 +125,18 @@ class ProductInline(admin.TabularInline):
 class OrderAdmin(admin.ModelAdmin):
 
     def get_form(self, request, obj=None, **kwargs):
-        order_products_ids = set(obj.products.all().values_list('id', flat=True))
-        verified_restaurants = []
-
-        for distance in obj.distance_to_restaurants.filter(order=obj):
-            restaurant_products_ids = set(
-                distance.restaurant.menu_items.filter(availability=True).values_list('product__id', flat=True)
-            )
-
-            if order_products_ids == (order_products_ids & restaurant_products_ids):
-                verified_restaurants.append(distance.restaurant)
-
         form = super(OrderAdmin, self).get_form(request, obj, **kwargs)
+
         form.base_fields['preparing_restaurant'].queryset = Restaurant.objects.filter(
-            name__in=verified_restaurants
+            distance_to_clients__order=obj,
+            name__in=obj.get_verified_restaurants
         ).order_by('distance_to_clients__distance_to_client')
 
         return form
 
     def save_formset(self, request, form, formset, change):
         if 'address' in form.changed_data:
-            pass
+            form.instance.update_distances_to_restaurants
 
         try:
             product = Product.objects.get(id=request.POST['orderkit_set-0-product'])
@@ -159,6 +150,7 @@ class OrderAdmin(admin.ModelAdmin):
         for instance in instances:
             instance.price = product.price * count
             instance.save()
+
         formset.save_m2m()
 
     def response_post_save_change(self, request, obj):
