@@ -1,6 +1,3 @@
-import requests
-
-from geopy import distance
 from django.db import transaction
 from django.http import JsonResponse
 from django.templatetags.static import static
@@ -13,8 +10,6 @@ from rest_framework.serializers import ReadOnlyField
 from .models import Order
 from .models import OrderKit
 from .models import Product
-from .models import Restaurant
-from star_burger.settings import YANDEX_GEO_API
 
 
 def banners_list_api(request):
@@ -39,25 +34,6 @@ def banners_list_api(request):
         'ensure_ascii': False,
         'indent': 4,
     })
-
-
-def fetch_coordinates(apikey: str, address: str):
-    base_url = "https://geocode-maps.yandex.ru/1.x"
-    response = requests.get(base_url, params={
-        "geocode": address,
-        "apikey": apikey,
-        "format": "json",
-    })
-    response.raise_for_status()
-    found_places = response.json()['response']['GeoObjectCollection']['featureMember']
-
-    if not found_places:
-        return None
-
-    most_relevant = found_places[0]
-    lon, lat = most_relevant['GeoObject']['Point']['pos'].split(" ")
-
-    return lat, lon
 
 
 def product_list_api(request):
@@ -132,20 +108,6 @@ def register_order(request):
         address=order_serializer.validated_data['address'],
     )
 
-    client_coordinates = fetch_coordinates(YANDEX_GEO_API, order.address)
-
-    distance_to_restaurants = []
-    for restaurant in Restaurant.objects.iterator():
-        if not restaurant.lat or not restaurant.lon:
-            lat, lon = fetch_coordinates(YANDEX_GEO_API, restaurant.address)
-            restaurant.lat = lat
-            restaurant.lon = lon
-            restaurant.save()
-        distance_to_restaurants.append({
-            'restaurant': restaurant,
-            'distance_to_client': distance.distance((restaurant.lat, restaurant.lon), client_coordinates).m,
-        })
-
     for product_notes in order_serializer.validated_data['products']:
         product = product_notes['product']
         count = product_notes['count']
@@ -158,10 +120,6 @@ def register_order(request):
             }
         )
 
-    for distance_to_restaurant in distance_to_restaurants:
-        order.distance_to_restaurants.create(
-            restaurant=distance_to_restaurant['restaurant'],
-            distance_to_client=distance_to_restaurant['distance_to_client']
-        )
+    order.add_distances_to_restaurants
 
     return Response(OrderSerializer(order).data)
