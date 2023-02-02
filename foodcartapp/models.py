@@ -1,7 +1,12 @@
+import requests
+
+from geopy import distance
 from django.db import models
 from django.core.validators import MinValueValidator
 from django.utils.timezone import now
 from phonenumber_field.modelfields import PhoneNumberField
+
+from star_burger.settings import YANDEX_GEO_API
 
 
 class Restaurant(models.Model):
@@ -236,6 +241,83 @@ class Order(models.Model):
 
     def __str__(self):
         return f'{self.phonenumber} {self.firstname} {self.lastname}'
+
+    @staticmethod
+    def fetch_coordinates(address: str):
+        global YANDEX_GEO_API
+
+        base_url = "https://geocode-maps.yandex.ru/1.x"
+        response = requests.get(base_url, params=dict(geocode=address, apikey=YANDEX_GEO_API, format="json"))
+        response.raise_for_status()
+        found_places = response.json()['response']['GeoObjectCollection']['featureMember']
+
+        if not found_places:
+            return None
+
+        most_relevant = found_places[0]
+        lon, lat = most_relevant['GeoObject']['Point']['pos'].split(" ")
+
+        return lat, lon
+
+    def _get_distance_to_restaurants(self) -> list[dict]:
+        client_coordinates = self.fetch_coordinates(self.address)
+
+        distances_to_restaurants = []
+        for restaurant in Restaurant.objects.iterator():
+            if not restaurant.lat or not restaurant.lon:
+                lat, lon = self.fetch_coordinates(restaurant.address)
+                restaurant.lat = lat
+                restaurant.lon = lon
+                restaurant.save()
+            distances_to_restaurants.append({
+                'restaurant': restaurant,
+                'distance_to_client': distance.distance((restaurant.lat, restaurant.lon), client_coordinates).m,
+            })
+
+        return distances_to_restaurants
+
+    @property
+    def add_distances_to_restaurants(self) -> None:
+        distance_to_restaurants = self._get_distance_to_restaurants()
+
+        for distance_to_restaurant in distance_to_restaurants:
+            self.distance_to_restaurants.create(
+                restaurant=distance_to_restaurant['restaurant'],
+                distance_to_client=distance_to_restaurant['distance_to_client']
+            )
+
+        return
+
+    @property
+    def update_distances_to_restaurants(self) -> None:
+        self.distance_to_restaurants.all().delete()
+        self.add_distances_to_restaurants
+
+        return
+
+    @property
+    def get_verified_distances(self) -> list:
+        order_products_ids = set(self.products.all().values_list('id', flat=True))
+        verified_distances = []
+
+        for distance in self.distance_to_restaurants.filter(order=self):
+            restaurant_products_ids = set(
+                distance.restaurant.menu_items.filter(availability=True).values_list('product__id', flat=True)
+            )
+
+            if order_products_ids == (order_products_ids & restaurant_products_ids):
+                verified_distances.append(distance)
+
+        return verified_distances
+
+    @property
+    def get_verified_restaurants(self) -> list:
+        verified_restaurants = []
+
+        for distance in self.get_verified_distances:
+            verified_restaurants.append(distance.restaurant)
+
+        return verified_restaurants
 
 
 class OrderKit(models.Model):
