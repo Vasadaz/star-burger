@@ -138,7 +138,7 @@ class OrderAdmin(admin.ModelAdmin):
         if 'address' in form.changed_data:
             form.instance.update_distances_to_restaurants
 
-        count_product = sum('product' in key and  '__prefix__' not in key for key in request.POST.keys())
+        count_product = sum('product' in key and '__prefix__' not in key for key in request.POST.keys())
         instances = formset.save(commit=False)
 
         for product_num in range(count_product):
