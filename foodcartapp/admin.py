@@ -134,21 +134,21 @@ class OrderAdmin(admin.ModelAdmin):
         return form
 
     def save_formset(self, request, form, formset, change):
+
         if 'address' in form.changed_data:
             form.instance.update_distances_to_restaurants
 
-        try:
-            product = Product.objects.get(id=request.POST['order_kits-0-product'])
-            count = int(request.POST['order_kits-0-count'])
-        except KeyError:
-            product = Product.objects.get(id=request.POST['order_kits-0-product'])
-            count = int(request.POST['order_kits-0-count'])
-
+        count_product = sum('product' in key and  '__prefix__' not in key for key in request.POST.keys())
         instances = formset.save(commit=False)
 
-        for instance in instances:
-            instance.price = product.price * count
-            instance.save()
+        for product_num in range(count_product):
+            product = Product.objects.get(id=request.POST[f'order_kits-{product_num}-product'])
+
+            for instance in instances:
+                if product == instance.product:
+                    count = int(request.POST[f'order_kits-{product_num}-count'])
+                    instance.price = product.price * count
+                    instance.save()
 
         formset.save_m2m()
 
