@@ -162,6 +162,7 @@ class Order(models.Model):
         ('4 delivered', 'Доставлен'),
     ]
     PAYMENT_CHOICES = [
+        ('not specified', 'Не указан'),
         ('cash', 'Наличными'),
         ('card', 'Картой'),
         ('online', 'Онлайн'),
@@ -182,7 +183,7 @@ class Order(models.Model):
     payment = models.CharField(
         verbose_name='оплата',
         choices=PAYMENT_CHOICES,
-        default='cash',
+        default='not specified',
         db_index=True,
         max_length=15,
     )
