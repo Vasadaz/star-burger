@@ -1,5 +1,4 @@
 from django.contrib import admin
-from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import reverse
 from django.templatetags.static import static
@@ -139,11 +138,11 @@ class OrderAdmin(admin.ModelAdmin):
             form.instance.update_distances_to_restaurants
 
         try:
-            product = Product.objects.get(id=request.POST['orderkit_set-0-product'])
-            count = int(request.POST['orderkit_set-0-count'])
+            product = Product.objects.get(id=request.POST['order_kits-0-product'])
+            count = int(request.POST['order_kits-0-count'])
         except KeyError:
-            product = Product.objects.get(id=request.POST['orderkit-0-product'])
-            count = int(request.POST['orderkit-0-count'])
+            product = Product.objects.get(id=request.POST['order_kits-0-product'])
+            count = int(request.POST['order_kits-0-count'])
 
         instances = formset.save(commit=False)
 

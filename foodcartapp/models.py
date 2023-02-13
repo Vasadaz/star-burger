@@ -147,7 +147,7 @@ class RestaurantMenuItem(models.Model):
 class OrderManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().annotate(
-            price=models.Sum(models.F('orderkit__price'), output_field=models.DecimalField())
+            price=models.Sum(models.F('order_kits__price'), output_field=models.DecimalField())
         ).order_by('status', 'id')
 
     def check_status(self):
@@ -325,13 +325,13 @@ class OrderKit(models.Model):
         Order,
         on_delete=models.CASCADE,
         verbose_name='заказ',
-        related_name='orderkit'
+        related_name='order_kits'
     )
     product = models.ForeignKey(
         Product,
         on_delete=models.CASCADE,
         verbose_name='продукт',
-        related_name='orderkit'
+        related_name='order_kits'
     )
     count = models.PositiveSmallIntegerField(
         verbose_name='количество',
