@@ -2,11 +2,10 @@ import requests
 
 from geopy import distance
 from django.db import models
+from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.utils.timezone import now
 from phonenumber_field.modelfields import PhoneNumberField
-
-from star_burger.settings import YANDEX_GEO_API
 
 
 class Restaurant(models.Model):
@@ -245,10 +244,9 @@ class Order(models.Model):
 
     @staticmethod
     def fetch_coordinates(address: str):
-        global YANDEX_GEO_API
 
         base_url = "https://geocode-maps.yandex.ru/1.x"
-        response = requests.get(base_url, params=dict(geocode=address, apikey=YANDEX_GEO_API, format="json"))
+        response = requests.get(base_url, params=dict(geocode=address, apikey=settings.YANDEX_GEO_API, format="json"))
         response.raise_for_status()
         found_places = response.json()['response']['GeoObjectCollection']['featureMember']
 
