@@ -374,4 +374,20 @@ class Distance(models.Model):
         verbose_name_plural = 'рестораны приготовят продукты из заказа'
 
     def __str__(self):
-        return f'{self.restaurant} - {self.distance_to_client} м'
+        return f'{self.restaurant} - {self.distance_to_client}м.'
+
+
+def fetch_coordinates(address: str) -> tuple[float, float]:
+    base_url = "https://geocode-maps.yandex.ru/1.x"
+    response = requests.get(base_url, params=dict(geocode=address, apikey=settings.YANDEX_GEO_API, format="json"))
+    response.raise_for_status()
+    found_places = response.json()['response']['GeoObjectCollection']['featureMember']
+
+    if not found_places:
+        raise ValueError('Адрес указан некорректно.')
+
+
+    most_relevant = found_places[0]
+    lon, lat = most_relevant['GeoObject']['Point']['pos'].split(" ")
+
+    return lat, lon

@@ -1,5 +1,5 @@
 from django.db import transaction
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseBadRequest
 from django.templatetags.static import static
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -97,7 +97,7 @@ class OrderSerializer(ModelSerializer):
 
 @transaction.atomic(durable=True)
 @api_view(['POST'])
-def register_order(request):
+def register_order(request) -> Response | HttpResponseBadRequest:
     order_serializer = OrderSerializer(data=request.data)
     order_serializer.is_valid(raise_exception=True)
 
@@ -119,7 +119,10 @@ def register_order(request):
                 'price': price,
             }
         )
-
-    order.add_distances_to_restaurants
+    try:
+        order.add_distances
+    except ValueError:
+        order.delete()
+        return HttpResponseBadRequest('Адрес указан не корректно. Мы не можем найти его координаты.')
 
     return Response(OrderSerializer(order).data)
