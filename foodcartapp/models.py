@@ -45,6 +45,15 @@ class Restaurant(models.Model):
     def __str__(self):
         return self.name
 
+    def get_coordinates(self) -> tuple[float, float]:
+        if not self.lat or not self.lon:
+            lat, lon = fetch_coordinates(self.address)
+            self.lat = lat
+            self.lon = lon
+            self.save()
+
+        return self.lat, self.lon
+
 
 class ProductQuerySet(models.QuerySet):
     def available(self):
@@ -161,7 +170,7 @@ class Order(models.Model):
         ('4 delivered', 'Доставлен'),
     ]
     PAYMENT_CHOICES = [
-        ('not specified', 'Не указан'),
+        ('not specified', 'Не указана'),
         ('cash', 'Наличными'),
         ('card', 'Картой'),
         ('online', 'Онлайн'),
@@ -242,59 +251,6 @@ class Order(models.Model):
     def __str__(self):
         return f'{self.phonenumber} {self.firstname} {self.lastname}'
 
-    @staticmethod
-    def fetch_coordinates(address: str):
-
-        base_url = "https://geocode-maps.yandex.ru/1.x"
-        response = requests.get(base_url, params=dict(geocode=address, apikey=settings.YANDEX_GEO_API, format="json"))
-        response.raise_for_status()
-        found_places = response.json()['response']['GeoObjectCollection']['featureMember']
-
-        if not found_places:
-            return None
-
-        most_relevant = found_places[0]
-        lon, lat = most_relevant['GeoObject']['Point']['pos'].split(" ")
-
-        return lat, lon
-
-    def _get_distance_to_restaurants(self) -> list[dict]:
-        client_coordinates = self.fetch_coordinates(self.address)
-
-        distances_to_restaurants = []
-        for restaurant in Restaurant.objects.iterator():
-            if not restaurant.lat or not restaurant.lon:
-                lat, lon = self.fetch_coordinates(restaurant.address)
-                restaurant.lat = lat
-                restaurant.lon = lon
-                restaurant.save()
-            distances_to_restaurants.append({
-                'restaurant': restaurant,
-                'distance_to_client': distance.distance((restaurant.lat, restaurant.lon), client_coordinates).m,
-            })
-
-        return distances_to_restaurants
-
-    @property
-    def add_distances_to_restaurants(self) -> None:
-        distance_to_restaurants = self._get_distance_to_restaurants()
-
-        for distance_to_restaurant in distance_to_restaurants:
-            self.distance_to_restaurants.create(
-                restaurant=distance_to_restaurant['restaurant'],
-                distance_to_client=distance_to_restaurant['distance_to_client']
-            )
-
-        return
-
-    @property
-    def update_distances_to_restaurants(self) -> None:
-        self.distance_to_restaurants.all().delete()
-        self.add_distances_to_restaurants
-
-        return
-
-    @property
     def get_verified_distances(self) -> list:
         order_products_ids = set(self.products.all().values_list('id', flat=True))
         verified_distances = []
@@ -309,11 +265,10 @@ class Order(models.Model):
 
         return verified_distances
 
-    @property
-    def get_verified_restaurants(self) -> list:
+    def get_verified_restaurants(self) -> list[Restaurant]:
         verified_restaurants = []
 
-        for distance in self.get_verified_distances:
+        for distance in self.get_verified_distances():
             verified_restaurants.append(distance.restaurant)
 
         return verified_restaurants
@@ -366,6 +321,7 @@ class Distance(models.Model):
     )
     distance_to_client = models.PositiveIntegerField(
         verbose_name='расстояние до клиента (м)',
+        default=0,
     )
 
     class Meta:
@@ -376,6 +332,14 @@ class Distance(models.Model):
     def __str__(self):
         return f'{self.restaurant} - {self.distance_to_client}м.'
 
+    def add_distance(self) -> None:
+        client_coordinates = fetch_coordinates(self.order.address)
+        self.distance_to_client = distance.distance(self.restaurant.get_coordinates(), client_coordinates).m
+        self.save()
+
+    def update_distance(self) -> None:
+        self.add_distance()
+
 
 def fetch_coordinates(address: str) -> tuple[float, float]:
     base_url = "https://geocode-maps.yandex.ru/1.x"
@@ -385,7 +349,6 @@ def fetch_coordinates(address: str) -> tuple[float, float]:
 
     if not found_places:
         raise ValueError('Адрес указан некорректно.')
-
 
     most_relevant = found_places[0]
     lon, lat = most_relevant['GeoObject']['Point']['pos'].split(" ")

@@ -10,6 +10,7 @@ from rest_framework.serializers import ReadOnlyField
 from .models import Order
 from .models import OrderKit
 from .models import Product
+from .models import Restaurant
 
 
 def banners_list_api(request):
@@ -120,7 +121,11 @@ def register_order(request) -> Response | HttpResponseBadRequest:
             }
         )
     try:
-        order.add_distances
+        for restaurant in Restaurant.objects.iterator():
+            order.distance_to_restaurants.create(
+                restaurant=restaurant
+            ).add_distance()
+
     except ValueError:
         order.delete()
         return HttpResponseBadRequest('Адрес указан не корректно. Мы не можем найти его координаты.')

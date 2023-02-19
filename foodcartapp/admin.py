@@ -128,7 +128,7 @@ class OrderAdmin(admin.ModelAdmin):
 
         form.base_fields['preparing_restaurant'].queryset = Restaurant.objects.filter(
             distance_to_clients__order=obj,
-            name__in=obj.get_verified_restaurants
+            name__in=obj.get_verified_restaurants()
         ).order_by('distance_to_clients__distance_to_client')
 
         return form
@@ -136,7 +136,8 @@ class OrderAdmin(admin.ModelAdmin):
     def save_formset(self, request, form, formset, change):
 
         if 'address' in form.changed_data:
-            form.instance.update_distances_to_restaurants
+            for distance in form.instance.distance_to_restaurants.iterator():
+                distance.update_distance()
 
         count_product = sum('product' in key and '__prefix__' not in key for key in request.POST.keys())
         instances = formset.save(commit=False)
