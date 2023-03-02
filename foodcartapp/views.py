@@ -120,14 +120,10 @@ def register_order(request) -> Response | HttpResponseBadRequest:
                 'price': price,
             }
         )
-    try:
-        for restaurant in Restaurant.objects.iterator():
-            order.distance_to_restaurants.create(
-                restaurant=restaurant
-            ).add_distance()
 
-    except ValueError:
-        order.delete()
-        return HttpResponseBadRequest('Адрес указан не корректно. Мы не можем найти его координаты.')
+    for restaurant in Restaurant.objects.iterator():
+        order.deliveries.create(
+            restaurant=restaurant
+        ).add_distance()
 
     return Response(OrderSerializer(order).data)

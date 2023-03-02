@@ -122,35 +122,42 @@ class ProductInline(admin.TabularInline):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
+    inlines = [ProductInline]
+    list_display = [
+        'phonenumber',
+        'firstname',
+        'address',
+    ]
 
     def get_form(self, request, obj=None, **kwargs):
-        form = super(OrderAdmin, self).get_form(request, obj, **kwargs)
+        form = super().get_form(request, obj, **kwargs)
 
         form.base_fields['preparing_restaurant'].queryset = Restaurant.objects.filter(
-            distance_to_clients__order=obj,
+            deliveries__order=obj,
             name__in=obj.get_verified_restaurants()
-        ).order_by('distance_to_clients__distance_to_client')
+        ).order_by('deliveries__distance')
 
         return form
 
     def save_formset(self, request, form, formset, change):
+        print(request.POST)
+        print()
 
         if 'address' in form.changed_data:
-            for distance in form.instance.distance_to_restaurants.iterator():
-                distance.update_distance()
+            for delivery in form.instance.deliveries.iterator():
+                delivery.add_distance()
 
-        count_product = sum('product' in key and '__prefix__' not in key for key in request.POST.keys())
-        instances = formset.save(commit=False)
+        if changed_kits := formset.save(commit=False):
+            product_count = sum('product' in key and '__prefix__' not in key for key in request.POST.keys())
 
-        for product_num in range(count_product):
-            product = Product.objects.get(id=request.POST[f'order_kits-{product_num}-product'])
+            for product_num in range(product_count):
+                product = Product.objects.get(id=request.POST[f'kits-{product_num}-product'])
+                count = int(request.POST[f'kits-{product_num}-count'])
 
-            for instance in instances:
-                if product == instance.product:
-                    count = int(request.POST[f'order_kits-{product_num}-count'])
-                    instance.price = product.price * count
-                    instance.save()
-
+                for changed_kit in changed_kits:
+                    if product == changed_kit.product:
+                        changed_kit.price = product.price * count
+                        changed_kit.save()
         formset.save_m2m()
 
     def response_post_save_change(self, request, obj):
@@ -159,10 +166,3 @@ class OrderAdmin(admin.ModelAdmin):
             return HttpResponseRedirect(request.GET['next'])
         else:
             return response
-
-    inlines = [ProductInline]
-    list_display = [
-        'phonenumber',
-        'firstname',
-        'address',
-    ]

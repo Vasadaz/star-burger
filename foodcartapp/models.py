@@ -1,7 +1,7 @@
 import requests
 
 from geopy import distance
-from django.db import models
+from django.db import models, utils
 from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.utils.timezone import now
@@ -155,7 +155,7 @@ class RestaurantMenuItem(models.Model):
 class OrderManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().annotate(
-            price=models.Sum(models.F('order_kits__price'), output_field=models.DecimalField())
+            price=models.Sum(models.F('kits__price'), output_field=models.DecimalField())
         ).order_by('status', 'id')
 
     def check_status(self):
@@ -251,25 +251,25 @@ class Order(models.Model):
     def __str__(self):
         return f'{self.phonenumber} {self.firstname} {self.lastname}'
 
-    def get_verified_distances(self) -> list:
+    def get_verified_deliveries(self) -> list:
         order_products_ids = set(self.products.all().values_list('id', flat=True))
-        verified_distances = []
+        verified_deliveries = []
 
-        for distance in self.distance_to_restaurants.filter(order=self):
+        for delivery in self.deliveries.filter(order=self):
             restaurant_products_ids = set(
-                distance.restaurant.menu_items.filter(availability=True).values_list('product__id', flat=True)
+                delivery.restaurant.menu_items.filter(availability=True).values_list('product__id', flat=True)
             )
 
             if order_products_ids == (order_products_ids & restaurant_products_ids):
-                verified_distances.append(distance)
+                verified_deliveries.append(delivery)
 
-        return verified_distances
+        return verified_deliveries
 
     def get_verified_restaurants(self) -> list[Restaurant]:
         verified_restaurants = []
 
-        for distance in self.get_verified_distances():
-            verified_restaurants.append(distance.restaurant)
+        for delivery in self.get_verified_deliveries():
+            verified_restaurants.append(delivery.restaurant)
 
         return verified_restaurants
 
@@ -279,13 +279,13 @@ class OrderKit(models.Model):
         Order,
         on_delete=models.CASCADE,
         verbose_name='заказ',
-        related_name='order_kits'
+        related_name='kits'
     )
     product = models.ForeignKey(
         Product,
         on_delete=models.CASCADE,
         verbose_name='продукт',
-        related_name='order_kits'
+        related_name='kits'
     )
     count = models.PositiveSmallIntegerField(
         verbose_name='количество',
@@ -306,51 +306,52 @@ class OrderKit(models.Model):
         return f'В заказе "{self.order}" есть "{self.product}" {self.count} шт.'
 
 
-class Distance(models.Model):
+class Delivery(models.Model):
     order = models.ForeignKey(
         Order,
         on_delete=models.CASCADE,
         verbose_name='заказ',
-        related_name='distance_to_restaurants',
+        related_name='deliveries',
     )
     restaurant = models.ForeignKey(
         Restaurant,
         on_delete=models.CASCADE,
         verbose_name='может приготовить ресторан',
-        related_name='distance_to_clients'
+        related_name='deliveries'
     )
-    distance_to_client = models.PositiveIntegerField(
-        verbose_name='расстояние до клиента (м)',
-        default=0,
+    distance = models.PositiveIntegerField(
+        verbose_name='расстояние доставки (м)',
+        default=None,
+        null=True,
     )
 
     class Meta:
-        ordering = ['distance_to_client']
+        ordering = ['distance']
         verbose_name = 'ресторан приготовит продукт из заказа'
-        verbose_name_plural = 'рестораны приготовят продукты из заказа'
+        verbose_name_plural = 'рестораны приготовят продукты из заказов'
 
     def __str__(self):
-        return f'{self.restaurant} - {self.distance_to_client}м.'
+        if self.distance:
+            return f'{self.restaurant} - {self.distance}м.'
+        else:
+            return f'{self.restaurant} - необходимо уточнить адрес!'
 
     def add_distance(self) -> None:
-        client_coordinates = fetch_coordinates(self.order.address)
-        self.distance_to_client = distance.distance(self.restaurant.get_coordinates(), client_coordinates).m
+        try:
+            client_coordinates = fetch_coordinates(self.order.address)
+            self.distance = distance.distance(self.restaurant.get_coordinates(), client_coordinates).m
+        except IndexError:
+            self.distance = None
         self.save()
-
-    def update_distance(self) -> None:
-        self.add_distance()
 
 
 def fetch_coordinates(address: str) -> tuple[float, float]:
     base_url = "https://geocode-maps.yandex.ru/1.x"
     response = requests.get(base_url, params=dict(geocode=address, apikey=settings.YANDEX_GEO_API, format="json"))
     response.raise_for_status()
+
     found_places = response.json()['response']['GeoObjectCollection']['featureMember']
-
-    if not found_places:
-        raise ValueError('Адрес указан некорректно.')
-
     most_relevant = found_places[0]
     lon, lat = most_relevant['GeoObject']['Point']['pos'].split(" ")
 
-    return lat, lon
+    return lon, lat
