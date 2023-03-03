@@ -148,16 +148,10 @@ class OrderAdmin(admin.ModelAdmin):
                 delivery.add_distance()
 
         if changed_kits := formset.save(commit=False):
-            product_count = sum('product' in key and '__prefix__' not in key for key in request.POST.keys())
+            for changed_kit in changed_kits:
+                changed_kit.price = changed_kit.product.price * changed_kit.count
+                changed_kit.save()
 
-            for product_num in range(product_count):
-                product = Product.objects.get(id=request.POST[f'kits-{product_num}-product'])
-                count = int(request.POST[f'kits-{product_num}-count'])
-
-                for changed_kit in changed_kits:
-                    if product == changed_kit.product:
-                        changed_kit.price = product.price * count
-                        changed_kit.save()
         formset.save_m2m()
 
     def response_post_save_change(self, request, obj):
