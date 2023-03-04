@@ -140,9 +140,6 @@ class OrderAdmin(admin.ModelAdmin):
         return form
 
     def save_formset(self, request, form, formset, change):
-        print(request.POST)
-        print()
-
         if 'address' in form.changed_data:
             for delivery in form.instance.deliveries.iterator():
                 delivery.add_distance()
