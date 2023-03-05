@@ -1,4 +1,4 @@
-from geopy import distance
+from geopy import distance as calculate_distance
 from django.db import models, utils
 from django.core.validators import MinValueValidator
 from django.utils.timezone import now
@@ -44,14 +44,14 @@ class Restaurant(models.Model):
     def __str__(self):
         return self.name
 
-    def get_coordinates(self) -> tuple[float, float]:
-        if not self.lat or not self.lon:
-            lat, lon = fetch_coordinates(self.address)
-            self.lat = lat
+    def get_coordinates(self) -> tuple[lon: float, lat: float]:
+        if not self.lon or not self.lat:
+            lon, lat = fetch_coordinates(self.address)
             self.lon = lon
+            self.lat = lat
             self.save()
 
-        return self.lat, self.lon
+        return self.lon, self.lat
 
 
 class ProductQuerySet(models.QuerySet):
@@ -330,19 +330,18 @@ class Delivery(models.Model):
         verbose_name_plural = 'рестораны приготовят продукты из заказов'
 
     def __str__(self):
-        if self.distance or self.distance:
+        if self.distance:
             return f'{self.restaurant} - {self.distance}м.'
         else:
             return f'{self.restaurant} - необходимо уточнить адрес!'
 
     def add_distance(self, max_distance=50000) -> None:
         client_coordinates = fetch_coordinates(self.order.address)
+        restaurant_coordinates = self.restaurant.get_coordinates()
 
-        if (client_distance := distance.distance(self.restaurant.get_coordinates(), client_coordinates).m) < max_distance:
-            self.distance = client_distance
+        if (distance := calculate_distance.distance(restaurant_coordinates, client_coordinates).m) < max_distance:
+            self.distance = distance
         else:
             self.distance = None
-        self.save()
 
-
-
+        self.save(update_fields=['distance'])
