@@ -1,11 +1,10 @@
-import requests
-
 from geopy import distance
 from django.db import models, utils
-from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.utils.timezone import now
 from phonenumber_field.modelfields import PhoneNumberField
+
+from .geocoder import fetch_coordinates
 
 
 class Restaurant(models.Model):
@@ -331,27 +330,19 @@ class Delivery(models.Model):
         verbose_name_plural = 'рестораны приготовят продукты из заказов'
 
     def __str__(self):
-        if self.distance:
+        if self.distance or self.distance:
             return f'{self.restaurant} - {self.distance}м.'
         else:
             return f'{self.restaurant} - необходимо уточнить адрес!'
 
-    def add_distance(self) -> None:
-        try:
-            client_coordinates = fetch_coordinates(self.order.address)
-            self.distance = distance.distance(self.restaurant.get_coordinates(), client_coordinates).m
-        except IndexError:
+    def add_distance(self, max_distance=50000) -> None:
+        client_coordinates = fetch_coordinates(self.order.address)
+
+        if (client_distance := distance.distance(self.restaurant.get_coordinates(), client_coordinates).m) < max_distance:
+            self.distance = client_distance
+        else:
             self.distance = None
         self.save()
 
 
-def fetch_coordinates(address: str) -> tuple[float, float]:
-    base_url = "https://geocode-maps.yandex.ru/1.x"
-    response = requests.get(base_url, params=dict(geocode=address, apikey=settings.YANDEX_GEO_API, format="json"))
-    response.raise_for_status()
 
-    found_places = response.json()['response']['GeoObjectCollection']['featureMember']
-    most_relevant = found_places[0]
-    lon, lat = most_relevant['GeoObject']['Point']['pos'].split(" ")
-
-    return lon, lat
