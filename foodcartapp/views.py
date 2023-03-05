@@ -95,35 +95,39 @@ class OrderSerializer(ModelSerializer):
             'price',
         ]
 
+    def create(self) -> Order:
+        order = Order.objects.create(
+            phonenumber=self.validated_data['phonenumber'],
+            firstname=self.validated_data['firstname'],
+            lastname=self.validated_data['lastname'],
+            address=self.validated_data['address'],
+        )
+
+        for product_notes in self.validated_data['products']:
+            product = product_notes['product']
+            count = product_notes['count']
+            price = product.price * count
+            order.products.add(
+                product,
+                through_defaults={
+                    'count': count,
+                    'price': price,
+                }
+            )
+
+        for restaurant in Restaurant.objects.iterator():
+            order.deliveries.create(
+                restaurant=restaurant
+            ).add_distance()
+
+        return order
+
 
 @transaction.atomic(durable=True)
 @api_view(['POST'])
 def register_order(request) -> Response | HttpResponseBadRequest:
     order_serializer = OrderSerializer(data=request.data)
     order_serializer.is_valid(raise_exception=True)
-
-    order = Order.objects.create(
-        phonenumber=order_serializer.validated_data['phonenumber'],
-        firstname=order_serializer.validated_data['firstname'],
-        lastname=order_serializer.validated_data['lastname'],
-        address=order_serializer.validated_data['address'],
-    )
-
-    for product_notes in order_serializer.validated_data['products']:
-        product = product_notes['product']
-        count = product_notes['count']
-        price = product.price * count
-        order.products.add(
-            product,
-            through_defaults={
-                'count': count,
-                'price': price,
-            }
-        )
-
-    for restaurant in Restaurant.objects.iterator():
-        order.deliveries.create(
-            restaurant=restaurant
-        ).add_distance()
+    order = order_serializer.create()
 
     return Response(OrderSerializer(order).data)
