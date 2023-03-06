@@ -151,11 +151,28 @@ class RestaurantMenuItem(models.Model):
         return f'{self.restaurant.name} - {self.product.name}'
 
 
+class OrderQuerySet(models.QuerySet):
+    def get_not_delivered(self):
+        return self.filter(preparing_restaurant__isnull=True).exclude(status='4 delivered')
+
+
 class OrderManager(models.Manager):
     def get_queryset(self):
-        return super().get_queryset().annotate(
-            price=models.Sum(models.F('kits__price'), output_field=models.DecimalField())
-        ).order_by('status', 'id')
+        return OrderQuerySet(
+            self.model,
+            using=self._db,
+        ).annotate(
+            price=models.Sum(
+                models.F('kits__price'),
+                output_field=models.DecimalField(),
+            ),
+        ).order_by(
+            'status',
+            'id',
+        )
+
+    def get_not_delivered(self):
+        return self.get_queryset().get_not_delivered()
 
 
 class Order(models.Model):

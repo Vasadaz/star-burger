@@ -93,7 +93,5 @@ def view_orders(request):
     return render(
         request,
         template_name='order_items.html',
-        context={
-            'orders': Order.objects.filter(preparing_restaurant__isnull=True).exclude(status='4 delivered')
-        }
+        context={'orders': Order.objects.get_not_delivered()},
     )
