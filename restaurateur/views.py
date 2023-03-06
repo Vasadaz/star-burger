@@ -90,8 +90,10 @@ def view_restaurants(request):
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
-    Order.objects.check_status()
-
-    orders = Order.objects.filter(preparing_restaurant__isnull=True).exclude(status='4 delivered')
-
-    return render(request, template_name='order_items.html', context={'orders': orders})
+    return render(
+        request,
+        template_name='order_items.html',
+        context={
+            'orders': Order.objects.filter(preparing_restaurant__isnull=True).exclude(status='4 delivered')
+        }
+    )

@@ -157,9 +157,6 @@ class OrderManager(models.Manager):
             price=models.Sum(models.F('kits__price'), output_field=models.DecimalField())
         ).order_by('status', 'id')
 
-    def check_status(self):
-        self.filter(preparing_restaurant__isnull=False, status='1 not processed').update(status='2 cooking')
-
 
 class Order(models.Model):
     STATUS_CHOICES = [
