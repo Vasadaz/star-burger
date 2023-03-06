@@ -265,6 +265,10 @@ class Order(models.Model):
         return f'{self.phonenumber} {self.firstname} {self.lastname}'
 
     def get_verified_deliveries(self) -> list:
+        """
+        Функция проверяет наличие в ресторане(модель Restaurant) продуктов из заказа(модель Order/self).
+        На основе результата проверки возвращается список для выбора проверенных вариантов доставки(модель Delivery).
+        """
         order_products_ids = set(self.products.all().values_list('id', flat=True))
         verified_deliveries = []
 
@@ -279,6 +283,10 @@ class Order(models.Model):
         return verified_deliveries
 
     def get_verified_restaurants(self) -> list[Restaurant]:
+        """
+        Функция на основе результат self.get_verified_deliveries() возвращает список проверенных
+        ресторанов(модель Restaurant).
+        """
         verified_restaurants = []
 
         for delivery in self.get_verified_deliveries():
@@ -320,6 +328,11 @@ class OrderKit(models.Model):
 
 
 class Delivery(models.Model):
+    """
+    Связующая модель между заказом(модель Order) и рестораном(модель Restaurant),
+    которая доступна из первичных моделей через атрибут deliveries.
+    Поле distance содержит информацию о расстояние в метрах от ресторана до клиента.
+    """
     order = models.ForeignKey(
         Order,
         on_delete=models.CASCADE,
