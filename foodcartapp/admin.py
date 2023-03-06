@@ -3,6 +3,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import reverse
 from django.templatetags.static import static
 from django.utils.html import format_html
+from django.utils.http import url_has_allowed_host_and_scheme
 
 from .models import Order
 from .models import Product
@@ -154,7 +155,7 @@ class OrderAdmin(admin.ModelAdmin):
     def response_post_save_change(self, request, obj):
         response = super().response_post_save_change(request, obj)
 
-        if "next" in request.GET:
-            return HttpResponseRedirect(request.GET['next'])
+        if url_has_allowed_host_and_scheme(request.GET['next'], None):
+             return HttpResponseRedirect(request.GET['next'])
         else:
             return response
