@@ -17,9 +17,6 @@ class OrderKitSerializer(ModelSerializer):
 
 class OrderSerializer(ModelSerializer):
     price = ReadOnlyField()
-    status = ReadOnlyField()
-    payment = ReadOnlyField()
-    comment = ReadOnlyField()
     products = OrderKitSerializer(many=True, allow_empty=False, write_only=True)
 
     class Meta:
@@ -35,6 +32,11 @@ class OrderSerializer(ModelSerializer):
             'payment',
             'comment',
             'price',
+        ]
+        read_only_fields = [
+            'status',
+            'payment',
+            'comment',
         ]
 
     def create(self) -> Order:
