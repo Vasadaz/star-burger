@@ -218,7 +218,8 @@ class Order(models.Model):
     )
     address = models.CharField(
         'адрес доставки',
-        max_length=150
+        max_length=150,
+        blank=True,
     )
     registered_at = models.DateTimeField(
         verbose_name='оформлен',

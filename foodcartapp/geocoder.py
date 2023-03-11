@@ -18,6 +18,9 @@ def fetch_coordinates(address: str) -> tuple[float, float] | None:
     except requests.exceptions.HTTPError:
         return None
 
+    except requests.exceptions.Timeout:
+        return None
+
     except IndexError:
         return None
 
