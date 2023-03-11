@@ -47,21 +47,17 @@ class OrderSerializer(ModelSerializer):
             address=self.validated_data['address'],
         )
 
-        for product_notes in self.validated_data['products']:
-            product = product_notes['product']
-            count = product_notes['count']
-            price = product.price * count
-            order.products.add(
-                product,
-                through_defaults={
-                    'count': count,
-                    'price': price,
-                }
+        OrderKit.objects.bulk_create([
+            OrderKit(
+                order=order,
+                product=product_notes['product'],
+                count=product_notes['count'],
+                price=product_notes['product'].price * product_notes['count'],
             )
+            for product_notes in self.validated_data['products']
+        ])
 
         for restaurant in Restaurant.objects.iterator():
-            order.deliveries.create(
-                restaurant=restaurant
-            ).add_distance()
+            order.deliveries.create(restaurant=restaurant).add_distance()
 
         return order
