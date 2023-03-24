@@ -149,7 +149,9 @@ Parcel будет следить за файлами в каталоге `bundle
 - `DEBUG` — дебаг-режим. Поставьте `False`.
 - `SECRET_KEY` — секретный ключ проекта. Он отвечает за шифрование на сайте. Например, им зашифрованы все пароли на вашем сайте.
 - `ALLOWED_HOSTS` — [см. документацию Django](https://docs.djangoproject.com/en/3.1/ref/settings/#allowed-hosts)
-- `YANDEX_GEO_API` - токен [геокодера Яндекса](https://developer.tech.yandex.ru/services/3).
+- `YANDEX_GEO_API` - токен [геокодера Яндекса](https://developer.tech.yandex.ru/services/3);
+- `ROLLBAR_ACCESS_TOKEN` - токен [Rollbar](https://rollbar.com) для мониторинга ошибок
+- `ROLLBAR_ENVIRONMENT` - [Rollbar](https://rollbar.com) ветка мониторинга `production` или `development`.
 
 
 ## Цели проекта
