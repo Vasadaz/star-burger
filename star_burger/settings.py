@@ -3,6 +3,7 @@ import os
 import dj_database_url
 
 from environs import Env
+from git import Repo
 
 
 env = Env()
@@ -39,6 +40,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'rollbar.contrib.django.middleware.RollbarNotifierMiddlewareExcluding404',
 ]
 
 ROOT_URLCONF = 'star_burger.urls'
@@ -118,11 +120,17 @@ INTERNAL_IPS = [
     '127.0.0.1'
 ]
 
-
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "assets"),
     os.path.join(BASE_DIR, "bundles"),
 ]
 
-
 YANDEX_GEO_API = env.str('YANDEX_GEO_API')
+
+ROLLBAR = {
+    'access_token': env.str('ROLLBAR_ACCESS_TOKEN'),
+    'branch': Repo(path=BASE_DIR).active_branch.name,
+    'environment': env.str('ROLLBAR_ENVIRONMENT'),
+    'code_version': '1.0',
+    'root': BASE_DIR,
+}
