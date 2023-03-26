@@ -146,12 +146,14 @@ Parcel будет следить за файлами в каталоге `bundle
 
 Настроить бэкенд: создать файл `.env` в каталоге `star_burger/` со следующими настройками:
 
-- `DEBUG` — дебаг-режим. Поставьте `False`.
-- `SECRET_KEY` — секретный ключ проекта. Он отвечает за шифрование на сайте. Например, им зашифрованы все пароли на вашем сайте.
 - `ALLOWED_HOSTS` — [см. документацию Django](https://docs.djangoproject.com/en/3.1/ref/settings/#allowed-hosts)
-- `YANDEX_GEO_API` - токен [геокодера Яндекса](https://developer.tech.yandex.ru/services/3);
+- `DB_URL` - URL для подключения к БД, пример: `postgres://user:paSsw0rd@localhost:5432/star_burger`
+- `DEBUG` — дебаг-режим. Поставьте `False`.
 - `ROLLBAR_ACCESS_TOKEN` - токен [Rollbar](https://rollbar.com) для мониторинга ошибок
 - `ROLLBAR_ENVIRONMENT` - [Rollbar](https://rollbar.com) ветка мониторинга `production` или `development`.
+- `SECRET_KEY` — секретный ключ проекта. Он отвечает за шифрование на сайте. Например, им зашифрованы все пароли на вашем сайте.
+- `YANDEX_GEO_API` - токен [геокодера Яндекса](https://developer.tech.yandex.ru/services/3);
+
 
 
 ## Цели проекта
