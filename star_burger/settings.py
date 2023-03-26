@@ -5,18 +5,16 @@ import dj_database_url
 from environs import Env
 from git import Repo
 
-
 env = Env()
 env.read_env()
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+SECRET_KEY = env.str('SECRET_KEY')
 
-SECRET_KEY = env('SECRET_KEY')
-DEBUG = env.bool('DEBUG', False)
+DEBUG = env.bool('DEBUG')
 
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', ['127.0.0.1', 'localhost'])
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
 
 INSTALLED_APPS = [
     'foodcartapp.apps.FoodcartappConfig',
@@ -64,7 +62,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR, "templates"),
+            os.path.join(BASE_DIR, 'templates'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -81,6 +79,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'star_burger.wsgi.application'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 MEDIA_URL = '/media/'
 
 DATABASE_URL = env.str('DB_URL')
@@ -88,6 +87,7 @@ DATABASE_URL = env.str('DB_URL')
 DATABASES = {
     'default': dj_database_url.parse(DATABASE_URL)
 }
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -114,15 +114,17 @@ USE_L10N = True
 
 USE_TZ = True
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
 STATIC_URL = '/static/'
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'assets'),
+    os.path.join(BASE_DIR, 'bundles'),
+]
 
 INTERNAL_IPS = [
     '127.0.0.1'
-]
-
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "assets"),
-    os.path.join(BASE_DIR, "bundles"),
 ]
 
 YANDEX_GEO_API = env.str('YANDEX_GEO_API')
