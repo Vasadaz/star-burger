@@ -16,7 +16,7 @@ echo "DONE pip"
 npm ci --include=dev > /dev/null
 echo "DONE npm"
 
-./node_modules/.bin/parcel build bundles-src/index.js --dist-dir bundles --public-url="./" > /dev/null
+./node_modules/.bin/parcel watch bundles-src/index.js --dist-dir bundles --public-url="./" > /dev/null
 echo "DONE parcel"
 
 python manage.py collectstatic --noinput > /dev/null
