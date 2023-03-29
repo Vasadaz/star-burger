@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-echo "START deploy" 
+echo "START deploy"
 echo
 
 set -e
@@ -13,7 +13,7 @@ echo "DONE activate venv"
 pip install -r requirements.txt > /dev/null
 echo "DONE pip"
 
-#npm ci --include=dev > /dev/null
+npm ci --include=dev > /dev/null
 echo "DONE npm"
 
 ./node_modules/.bin/parcel build bundles-src/index.js --dist-dir bundles --public-url="./" > /dev/null
