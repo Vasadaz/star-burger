@@ -12,7 +12,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = env.str('SECRET_KEY')
 
-DEBUG = env.bool('DEBUG')
+DEBUG = env.bool('DEBUG', False)
 
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
 
@@ -130,9 +130,9 @@ INTERNAL_IPS = [
 YANDEX_GEO_API = env.str('YANDEX_GEO_API')
 
 ROLLBAR = {
-    'access_token': env.str('ROLLBAR_ACCESS_TOKEN'),
+    'access_token': env.str('ROLLBAR_ACCESS_TOKEN', ''),
     'branch': Repo(path=BASE_DIR).active_branch.name,
-    'environment': env.str('ROLLBAR_ENVIRONMENT'),
+    'environment': env.str('ROLLBAR_ENVIRONMENT', ''),
     'code_version': '1.0',
     'root': BASE_DIR,
 }

@@ -150,8 +150,7 @@ Parcel будет следить за файлами в каталоге `bundle
 
 ## Как запустить prod-версию сайта
 
-Собрать фронтенд:
-
+#### 1. Собрать фронтенд.
 ```sh
 # Если при сборке будет ошибка - Error: You must provide the URL of lib/mappings.wasm...
 # то раскомментировать экспорт переменной:
@@ -159,15 +158,19 @@ Parcel будет следить за файлами в каталоге `bundle
 ./node_modules/.bin/parcel build bundles-src/index.js --dist-dir bundles --public-url="./"
 ```
 
-Настроить бэкенд: создать файл `.env` в каталоге `star_burger/` со следующими настройками:
+#### 2. Настроить бэкенд.
+
+Cоздать файл `.env` в каталоге `star_burger/` со следующими обязательными настройками:
 
 - `ALLOWED_HOSTS` — [см. документацию Django](https://docs.djangoproject.com/en/3.1/ref/settings/#allowed-hosts)
 - `DB_URL` - URL для подключения к БД, пример: `postgres://user:paSsw0rd@localhost:5432/star_burger`
-- `DEBUG` — дебаг-режим. Поставьте `False`.
-- `ROLLBAR_ACCESS_TOKEN` - токен [Rollbar](https://rollbar.com) для мониторинга ошибок
-- `ROLLBAR_ENVIRONMENT` - [Rollbar](https://rollbar.com) ветка мониторинга `production` или `development`.
 - `SECRET_KEY` — секретный ключ проекта. Он отвечает за шифрование на сайте. Например, им зашифрованы все пароли на вашем сайте.
 - `YANDEX_GEO_API` - токен [геокодера Яндекса](https://developer.tech.yandex.ru/services/3);
+
+Необязательные настройки `.env`:
+- `DEBUG` — дебаг-режим, по-умолчанию `False`.
+- `ROLLBAR_ACCESS_TOKEN` - токен [Rollbar](https://rollbar.com) для мониторинга ошибок
+- `ROLLBAR_ENVIRONMENT` - [Rollbar](https://rollbar.com) ветка мониторинга `production` или `development`.
 
 
 ## Деплой проекта
