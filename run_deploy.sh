@@ -23,7 +23,7 @@ echo "DONE parcel"
 python manage.py collectstatic --noinput > /dev/null
 echo "DONE collectstatic"
 
-python manage.py migrate > /dev/null
+python manage.py migrate --noinput > /dev/null
 echo "DONE migrate"
 
 systemctl restart star-burger.service
