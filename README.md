@@ -23,7 +23,7 @@
 
 Скачайте код:
 ```sh
-git clone https://github.com/devmanorg/star-burger.git
+git clone https://github.com/Vasadaz/star_burger.git
 ```
 
 Перейдите в каталог проекта:
