@@ -57,7 +57,7 @@ pip install -r requirements.txt
 ```
 
 Получить токен [геокодера Яндекса](https://developer.tech.yandex.ru/services/3).
-Определите переменную окружения `SECRET_KEY` и `YANDEX_GEO_API`. Создать файл `.env` в каталоге `star_burger/` и положите туда такой код:
+Определите переменную окружения `SECRET_KEY` и `YANDEX_GEO_API`. Создать файл `.env/project/.env` в каталоге `star_burger/` и положите туда такой код:
 ```sh
 SECRET_KEY=django-insecure-0if40nf4nf93n4
 YANDEX_GEO_API=ed562gf-b95a-8563-a7c6-fa6891033e38c8ba0
