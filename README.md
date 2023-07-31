@@ -57,7 +57,7 @@ pip install -r requirements.txt
 ```
 
 Получить токен [геокодера Яндекса](https://developer.tech.yandex.ru/services/3).
-Определите переменную окружения `SECRET_KEY` и `YANDEX_GEO_API`. Создать файл `.env/project/.env` в каталоге `star_burger/` и положите туда такой код:
+Определите переменную окружения `SECRET_KEY` и `YANDEX_GEO_API`. Создать файл `.env/django/.env` в каталоге `star_burger/` и положите туда такой код:
 ```sh
 SECRET_KEY=django-insecure-0if40nf4nf93n4
 YANDEX_GEO_API=ed562gf-b95a-8563-a7c6-fa6891033e38c8ba0
@@ -160,14 +160,14 @@ Parcel будет следить за файлами в каталоге `bundle
 
 #### 2. Настроить бэкенд.
 
-Cоздать файл `.env` в каталоге `star_burger/` со следующими обязательными настройками:
+Cоздать файл `.env/django/.env` в каталоге `star_burger/` со следующими обязательными настройками:
 
 - `ALLOWED_HOSTS` — [см. документацию Django](https://docs.djangoproject.com/en/3.1/ref/settings/#allowed-hosts)
 - `DB_URL` - URL для подключения к БД, пример: `postgres://user:paSsw0rd@localhost:5432/star_burger`
 - `SECRET_KEY` — секретный ключ проекта. Он отвечает за шифрование на сайте. Например, им зашифрованы все пароли на вашем сайте.
 - `YANDEX_GEO_API` - токен [геокодера Яндекса](https://developer.tech.yandex.ru/services/3);
 
-Необязательные настройки `.env`:
+Необязательные настройки `.env/django/.env`:
 - `DEBUG` — дебаг-режим, по-умолчанию `False`.
 - `ROLLBAR_ACCESS_TOKEN` - токен [Rollbar](https://rollbar.com) для мониторинга ошибок
 - `ROLLBAR_ENVIRONMENT` - [Rollbar](https://rollbar.com) ветка мониторинга `production` или `development`.

@@ -6,7 +6,7 @@ from environs import Env
 from git import Repo
 
 env = Env()
-env.read_env(path='.env/project/.env')
+env.read_env(path='.env/django/.env')
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
