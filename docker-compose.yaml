@@ -31,13 +31,13 @@ services:
     depends_on:
       - django
     ports:
-      - 80:80
+      - 80:8000
       - 443:443
     restart: always
     volumes:
       - ./certbot/conf/:/etc/nginx/ssl/:ro
       - ./certbot/www:/var/www/certbot/:ro
-      #- ./nginx/conf/:/etc/nginx/conf.d/:ro
+      - ./nginx/conf/:/etc/nginx/conf.d/:ro
       - star_burger_media:/opt/star-burger/media:ro
       - star_burger_static:/opt/star-burger/static:ro
 
