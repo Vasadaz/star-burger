@@ -28,7 +28,7 @@ git clone https://github.com/Vasadaz/star_burger.git
 
 Перейдите в каталог проекта:
 ```sh
-cd star-burger
+cd star_burger
 ```
 
 [Установите Python](https://www.python.org/), если этого ещё не сделали.
@@ -43,12 +43,12 @@ python --version
 
 В каталоге проекта создайте виртуальное окружение:
 ```sh
-python -m venv venv
+python -m venv .venv
 ```
 Активируйте его. На разных операционных системах это делается разными командами:
 
-- Windows: `.\venv\Scripts\activate`
-- MacOS/Linux: `source venv/bin/activate`
+- Windows: `.\.venv\Scripts\activate`
+- MacOS/Linux: `source .venv/bin/activate`
 
 
 Установите зависимости в виртуальное окружение:
@@ -103,7 +103,7 @@ npm --version
 Перейдите в каталог проекта и установите пакеты Node.js:
 
 ```sh
-cd star-burger
+cd star_burger
 npm ci --include=dev
 ```
 
@@ -113,7 +113,7 @@ npm ci --include=dev
 В отличие от Webpack он прост в использовании и совсем не требует настроек.
 Проверяем успешную установку `parcel`:
 ```sh
-cd star-burger
+cd star_burger
 ./node_modules/.bin/parcel --version
 # 2.4.0
 ```

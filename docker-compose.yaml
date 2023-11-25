@@ -22,8 +22,8 @@ services:
       - 8000
     restart: always
     volumes:
-      - star_burger_media:/opt/star-burger/media
-      - star_burger_static:/opt/star-burger/static
+      - star_burger_media:/opt/star_burger/media
+      - star_burger_static:/opt/star_burger/static
 
   nginx:
     build: ./nginx
@@ -38,8 +38,8 @@ services:
       - ./certbot/conf/:/etc/nginx/ssl/:ro
       - ./certbot/www:/var/www/certbot/:ro
       - ./nginx/conf/:/etc/nginx/conf.d/:ro
-      - star_burger_media:/opt/star-burger/media:ro
-      - star_burger_static:/opt/star-burger/static:ro
+      - star_burger_media:/opt/star_burger/media:ro
+      - star_burger_static:/opt/star_burger/static:ro
 
   certbot:
     container_name: star_burger_certbot

@@ -1,6 +1,6 @@
 FROM node:18.15-alpine AS parcel
 
-ENV APP_DIR=/opt/star-burger
+ENV APP_DIR=/opt/star_burger
 
 WORKDIR $APP_DIR
 
@@ -16,7 +16,7 @@ RUN ./node_modules/.bin/parcel build bundles-src/index.js --dist-dir bundles --p
 
 FROM python:3.11.3-alpine
 
-ENV APP_DIR=/opt/star-burger
+ENV APP_DIR=/opt/star_burger
 
 WORKDIR $APP_DIR
 
