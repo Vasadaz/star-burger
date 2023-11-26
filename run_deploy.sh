@@ -17,7 +17,7 @@ npm ci --include=dev
 echo "DONE npm"
 
 export NODE_OPTIONS=--no-experimental-fetch
-/opt/star_burger/node_modules/.bin/parcel build bundles-src/index.js --dist-dir bundles --public-url="./" > /dev/null
+./node_modules/.bin/parcel build bundles-src/index.js --dist-dir bundles --public-url="./" > /dev/null
 echo "DONE parcel"
 
 python manage.py collectstatic --noinput > /dev/null
@@ -27,7 +27,7 @@ python manage.py migrate --noinput > /dev/null
 echo "DONE migrate"
 
 systemctl restart star_burger.service
-echo "DONE restsrt site"
+echo "DONE restart site"
 
 echo
 echo "INFO status site"
@@ -46,3 +46,8 @@ echo "DONE deactivate venv"
 
 echo
 echo "END deploy"
+
+pip -V
+PATH="$PATH:/home/vasadaz/.local/bin"
+sudo curl https://bootstrap.pypa.io/get-pip.py | python3
+pip -V
