@@ -30,12 +30,14 @@ systemctl restart star_burger.service
 echo "DONE restart site"
 
 echo
-echo "INFO status site"
+echo "INFO status site - for exit press key Q"
 systemctl status star_burger.service
 
 source .env/django/.env
+# shellcheck disable=SC2155
+# shellcheck disable=SC2006
 export COMMIT=`git rev-parse HEAD` HOSTNAME=`hostname`
-curl -H "X-Rollbar-Access-Token: $ROLLBAR_ACCESS_TOKEN " -H "Content-Type: application/json" -X POST 'https://api.rollbar.com/api/1/deploy' -d '{"environment": "'$ROLLBAR_ENVIRONMENT'", "revision": "'$COMMIT'", "local_username": "'$USER'@'$HOSTNAME'", "comment": "Bash deployment", "status": "succeeded"}'> /dev/null
+curl -H "X-Rollbar-Access-Token: $ROLLBAR_ACCESS_TOKEN " -H "Content-Type: application/json" -X POST 'https://api.rollbar.com/api/1/deploy' -d '{"environment": "'"$ROLLBAR_ENVIRONMENT"'", "revision": "'"$COMMIT"'", "local_username": "'"$USER"'@'"$HOSTNAME"'", "comment": "Bash deployment", "status": "succeeded"}'> /dev/null
 
 unset COMMIT HOSTNAME
 
