@@ -148,3 +148,4 @@ cython_debug/
 
 # Project ignore
 static/
+data_dump.json
