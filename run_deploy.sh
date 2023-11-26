@@ -46,8 +46,3 @@ echo "DONE deactivate venv"
 
 echo
 echo "END deploy"
-
-pip -V
-PATH="$PATH:/home/vasadaz/.local/bin"
-sudo curl https://bootstrap.pypa.io/get-pip.py | python3
-pip -V
