@@ -89,13 +89,13 @@ python manage.py runserver
 
 ```sh
 nodejs --version
-# v18.15.0
+# v18.17.1
 # Если ошибка, попробуйте node:
 node --version
-# v18.15.0
+# v18.17.1
 
 npm --version
-# 9.5.0
+# 10.2.4
 ```
 
 Версия `nodejs` должна быть не младше 10.0. Версия `npm` не важна. Как обновить Node.js читайте в статье: [How to Update Node.js](https://phoenixnap.com/kb/update-node-js-version).
