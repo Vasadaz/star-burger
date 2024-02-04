@@ -1,0 +1,17 @@
+.env/
+.idea/
+.parcel-cache/
+.venv/
+assets/
+bundles/
+bundles-src/
+media/
+node_modules/
+static/
+
+!.env/django/
+data_dump.json
+package*.json
+db.sqlite3
+*[Dd]ocker*
+

@@ -1,54 +1,30 @@
 version: '3.8'
 
 services:
-  postgresql:
-    container_name: star_burger_pgdb
-    env_file:
-      - .env/postgresql/.env
-    image: postgres:15.0-alpine
-    restart: always
-    volumes:
-      - star_burger_postgresql_data:/var/lib/postgresql/data/
 
-  django:
+  web:
     build: ./
-    command: gunicorn -w 2 -b 0.0.0.0:8000 star_burger.wsgi:application
-    container_name: star_burger_django
+    command: python manage.py runserver 0.0.0.0:8000
+    container_name: django
+    restart: always
     depends_on:
-      - postgresql
+      - db
+    ports:
+      - 8000:8000
     env_file:
       - .env/django/.env
-    expose:
-      - 8000
-    restart: always
-    volumes:
-      - star_burger_media:/opt/star_burger/media
-      - star_burger_static:/opt/star_burger/static
 
-  nginx:
-    build: ./nginx
-    container_name: star_burger_nginx
-    depends_on:
-      - django
+  db:
+    image: postgres:15.0-alpine
+    container_name: postgres
+    restart: always
     ports:
-      - 80:8000
-      - 443:443
-    restart: always
+      - 5432:5432
+    env_file:
+      - .env/postgresql/.env
     volumes:
-      - ./certbot/conf/:/etc/nginx/ssl/:ro
-      - ./certbot/www:/var/www/certbot/:ro
-      - ./nginx/conf/:/etc/nginx/conf.d/:ro
-      - star_burger_media:/opt/star_burger/media:ro
-      - star_burger_static:/opt/star_burger/static:ro
-
-  certbot:
-    container_name: star_burger_certbot
-    image: certbot/certbot:latest
-    volumes:
-      - ./certbot/conf/:/etc/letsencrypt/:rw
-      - ./certbot/www/:/var/www/certbot/:rw
+      - db_data:/var/lib/postgresql/data/
 
 volumes:
-  star_burger_media: null
-  star_burger_postgresql_data: null
-  star_burger_static: null
+  db_data:
+
