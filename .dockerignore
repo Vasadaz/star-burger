@@ -2,7 +2,6 @@
 .idea/
 .parcel-cache/
 .venv/
-assets/
 bundles/
 bundles-src/
 media/
