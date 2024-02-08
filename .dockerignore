@@ -1,8 +1,6 @@
 .idea/
 .parcel-cache/
 .venv/
-bundles/
-bundles-src/
 media/
 node_modules/
 static/

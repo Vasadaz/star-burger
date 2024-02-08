@@ -12,10 +12,12 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data/
 
-  django:
+  web:
     build: .
     container_name: django
-    command: python manage.py runserver 0.0.0.0:8000
+    command: "
+      gunicorn -w 2 -b 0.0.0.0:8000 star_burger.wsgi:application
+    "
     restart: always
     ports:
       - "8000:8000"
@@ -25,7 +27,11 @@ services:
       - "pgdb:pgdb"
     depends_on:
       - pgdb
+    volumes:
+      - web_media:/opt/star_burger/media
+      - web_static:/opt/star_burger/static
 
 volumes:
   db_data: null
-
+  web_media: null
+  web_static: null
