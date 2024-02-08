@@ -1,4 +1,3 @@
-.env/
 .idea/
 .parcel-cache/
 .venv/
@@ -8,9 +7,9 @@ media/
 node_modules/
 static/
 
-!.env/django/
 data_dump.json
 package*.json
 db.sqlite3
+.editorconfig
 *[Dd]ocker*
 
