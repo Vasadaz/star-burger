@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 
 services:
   pgdb:
@@ -12,13 +12,26 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data/
 
-  web:
+  nodejs-parcel:
+    build:
+      context: .
+      dockerfile: ./docker/frontend/Dockerfile
+    container_name: nodejs-parcel
+    command: "node server.js"
+    restart: always
+    ports:
+      - "8000:8000"
+    volumes:
+      - web_bundles:/opt/star_burger/bundles
+      - web_static:/opt/star_burger/static
+
+  django:
     build:
       context: .
       dockerfile: ./docker/backend/Dockerfile
     container_name: django
     command: "
-      gunicorn -w 2 -b 0.0.0.0:8000 star_burger.wsgi:application
+      gunicorn --preload -w 2 -b 0.0.0.0:8000 star_burger.wsgi:application
     "
     restart: always
     ports:
@@ -29,11 +42,14 @@ services:
       - "pgdb:pgdb"
     depends_on:
       - pgdb
+      - nodejs-parcel
     volumes:
+      - web_bundles:/opt/star_burger/bundles
       - web_media:/opt/star_burger/media
       - web_static:/opt/star_burger/static
 
 volumes:
   db_data: null
+  web_bundles: null
   web_media: null
   web_static: null
