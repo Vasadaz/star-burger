@@ -13,7 +13,9 @@ services:
       - db_data:/var/lib/postgresql/data/
 
   web:
-    build: .
+    build:
+      context: .
+      dockerfile: ./docker/backend/Dockerfile
     container_name: django
     command: "
       gunicorn -w 2 -b 0.0.0.0:8000 star_burger.wsgi:application

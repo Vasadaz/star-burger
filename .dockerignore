@@ -1,13 +1,36 @@
+# Project
+.git/
 .idea/
-.parcel-cache/
 .venv/
 media/
-node_modules/
 static/
-
 data_dump.json
-package*.json
-db.sqlite3
-.editorconfig
+.gitignore
 *[Dd]ocker*
 
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+.tox
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.mypy_cache
+.pytest_cache
+.hypothesis
+
+# Node.js
+node_modules/
+dist
+npm-debug.log
+.coverage*
+.aws
