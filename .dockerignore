@@ -29,6 +29,7 @@ coverage.xml
 
 # Node.js
 node_modules/
+bundles/
 dist
 npm-debug.log
 .coverage*

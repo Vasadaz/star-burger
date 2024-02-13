@@ -1,16 +1,10 @@
 FROM node:18.17.1
 
-WORKDIR /opt/star_burger
+WORKDIR /app
 
-COPY package*.json ./
-
+COPY ../../package*.json .
+COPY ../../bundles-src bundles-src
 RUN npm ci --include=dev
-COPY ./bundles-src ./bundles-src
+# RUN ./node_modules/.bin/parcel watch bundles-src/index.js --dist-dir bundles --public-url="./"
 
-RUN ./node_modules/.bin/parcel build bundles-src/index.js --dist-dir bundles --public-url="./"
-
-EXPOSE 8080
-
-CMD [ "node", "server.js" ]
-#CMD ["./node_modules/.bin/parcel", "build", "bundles-src/index.js", "--dist-dir", "bundles", "--public-url='./'"]
-#CMD ["node", "bin/www"]
+CMD ["./node_modules/.bin/parcel", "watch", "bundles-src/index.js", "--dist-dir", "bundles", "--public-url='./'"]
