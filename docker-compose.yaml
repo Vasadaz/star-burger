@@ -19,8 +19,7 @@ services:
     container_name: nodejs-parcel
     restart: always
     volumes:
-      - web_bundles:/app/bundles
-      - web_static:/app/static
+      - bundles:/app/bundles
 
   django:
     build:
@@ -38,12 +37,27 @@ services:
       - pgdb
       - nodejs-parcel
     volumes:
-      - web_bundles:/opt/star_burger/bundles
-      - web_media:/opt/star_burger/media
-      - web_static:/opt/star_burger/static
+      - bundles:/app/bundles
+      - media:/app/media
+      - static:/app/static
 
 volumes:
-  db_data: null
-  web_bundles: null
-  web_media: null
-  web_static: null
+  db_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./db_data
+      o: bind
+  bundles: null
+  media:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./media
+      o: bind
+  static:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./static
+      o: bind

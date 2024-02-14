@@ -1,6 +1,6 @@
 FROM python:3.11.3-alpine
 
-WORKDIR /opt/star_burger
+WORKDIR /app
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
@@ -13,7 +13,8 @@ RUN apk add git && \
 
 EXPOSE 8000
 
-CMD sleep 10 && \
+CMD sleep 30 && \
     python manage.py migrate --no-input && \
+    chmod +x *sh && ./initadmin.sh && \
     python manage.py collectstatic --no-input --clear && \
     gunicorn --preload -w 2 -b 0.0.0.0:8000 star_burger.wsgi:application
