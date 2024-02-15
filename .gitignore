@@ -137,8 +137,6 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
-.parcel-cache/
-
 # IDEA
 .idea/
 
@@ -146,6 +144,7 @@ cython_debug/
 bundles/
 media/
 node_modules/
+.parcel-cache/
 static/
 db_data/
-data_dump.json
+*.old
