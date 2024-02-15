@@ -28,7 +28,7 @@ services:
     container_name: django
     restart: always
     ports:
-      - "8000:8000"
+      - "8080:8080"
     env_file:
       - .env/django/.env
     links:
@@ -42,20 +42,23 @@ services:
       - static:/app/static
 
 volumes:
+  bundles: null
   db_data:
+    external: false
     driver: local
     driver_opts:
       type: none
       device: ./db_data
       o: bind
-  bundles: null
   media:
+    external: false
     driver: local
     driver_opts:
       type: none
       device: ./media
       o: bind
   static:
+    external: false
     driver: local
     driver_opts:
       type: none
