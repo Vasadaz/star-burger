@@ -13,8 +13,7 @@ RUN apk add git && \
 
 EXPOSE 8080
 
-CMD sleep 20 && \
+CMD sleep 20 && chmod +x *sh && \
     python manage.py migrate --no-input && \
-    chmod +x *sh && ./initadmin.sh && \
     python manage.py collectstatic --no-input --clear && \
     gunicorn --preload -w 2 -b 0.0.0.0:8080 star_burger.wsgi:application
