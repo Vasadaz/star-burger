@@ -10,7 +10,7 @@ services:
     env_file:
       - .env/postgresql/.env
     volumes:
-      - db_data:/var/lib/postgresql/data/
+      - ./db_data:/var/lib/postgresql/data/
 
   nodejs-parcel:
     build:
@@ -38,26 +38,8 @@ services:
       - nodejs-parcel
     volumes:
       - bundles:/app/frontend/bundles
-      - media:/app/frontend/media
-      - static:/app/frontend/static
+      - ./frontend/media:/app/frontend/media
+      - ./frontend/static:/app/frontend/static
 
 volumes:
   bundles: null
-  db_data:
-    driver: local
-    driver_opts:
-      type: none
-      device: db_data
-      o: bind
-  media:
-    driver: local
-    driver_opts:
-      type: none
-      device: frontend/media
-      o: bind
-  static:
-    driver: local
-    driver_opts:
-      type: none
-      device: frontend/static
-      o: bind
