@@ -6,7 +6,7 @@ from environs import Env
 from git import Repo
 
 env = Env()
-env.read_env(path='.env/django/.env')
+env.read_env(path='../.env/django/.env')
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -78,7 +78,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'star_burger.wsgi.application'
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = os.path.join(BASE_DIR, '../frontend/media')
 
 MEDIA_URL = '/media/'
 
@@ -114,13 +114,13 @@ USE_L10N = True
 
 USE_TZ = True
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = os.path.join(BASE_DIR, '../frontend/static')
 
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'assets'),
-    os.path.join(BASE_DIR, 'bundles'),
+    os.path.join(BASE_DIR, '../frontend/assets'),
+    os.path.join(BASE_DIR, '../frontend/bundles'),
 ]
 
 INTERNAL_IPS = [
@@ -131,7 +131,7 @@ YANDEX_GEO_API = env.str('YANDEX_GEO_API')
 
 ROLLBAR = {
     'access_token': env.str('ROLLBAR_ACCESS_TOKEN', ''),
-    'branch': Repo(path=BASE_DIR).active_branch.name,
+    'branch': Repo(path='../').active_branch.name,
     'environment': env.str('ROLLBAR_ENVIRONMENT', ''),
     'code_version': '1.0',
     'root': BASE_DIR,

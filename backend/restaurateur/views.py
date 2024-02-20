@@ -29,7 +29,7 @@ class Login(forms.Form):
 class LoginView(View):
     def get(self, request, *args, **kwargs):
         form = Login()
-        return render(request, "login.html", context={
+        return render(request, "templates/login.html", context={
             'form': form
         })
 
@@ -47,7 +47,7 @@ class LoginView(View):
                     return redirect("restaurateur:RestaurantView")
                 return redirect("start_page")
 
-        return render(request, "login.html", context={
+        return render(request, "templates/login.html", context={
             'form': form,
             'ivalid': True,
         })
@@ -75,7 +75,7 @@ def view_products(request):
             (product, ordered_availability)
         )
 
-    return render(request, template_name="products_list.html", context={
+    return render(request, template_name="templates/products_list.html", context={
         'products_with_restaurant_availability': products_with_restaurant_availability,
         'restaurants': restaurants,
     })
@@ -83,7 +83,7 @@ def view_products(request):
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_restaurants(request):
-    return render(request, template_name="restaurants_list.html", context={
+    return render(request, template_name="templates/restaurants_list.html", context={
         'restaurants': Restaurant.objects.all(),
     })
 
@@ -92,6 +92,6 @@ def view_restaurants(request):
 def view_orders(request):
     return render(
         request,
-        template_name='order_items.html',
+        template_name='templates/order_items.html',
         context={'orders': Order.objects.get_not_delivered()},
     )

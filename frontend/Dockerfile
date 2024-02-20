@@ -2,10 +2,10 @@
 
 FROM node:17.6.0-alpine3.15
 
-WORKDIR /app
+WORKDIR /app/frontend/
 
-COPY package*.json .
-COPY bundles-src bundles-src
+COPY ./frontend/package*.json .
+COPY ./frontend/bundles-src bundles-src
 
 RUN npm ci --include=dev
 

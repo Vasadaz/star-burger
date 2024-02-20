@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from foodcartapp.models import Ac
+
 class Command(BaseCommand):
 
     def handle(self, *args, **options):

@@ -2,7 +2,7 @@ import json
 
 from django.core.management.base import BaseCommand
 
-from foodcartapp.models import Product, ProductCategory, Restaurant, RestaurantMenuItem
+from backend.foodcartapp.models import Product, ProductCategory, Restaurant, RestaurantMenuItem
 
 
 class Command(BaseCommand):

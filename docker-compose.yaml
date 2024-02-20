@@ -15,16 +15,16 @@ services:
   nodejs-parcel:
     build:
       context: .
-      dockerfile: docker/frontend/Dockerfile
+      dockerfile: frontend/Dockerfile
     container_name: nodejs-parcel
     restart: always
     volumes:
-      - bundles:/app/bundles
+      - bundles:/app/frontend/bundles
 
   django:
     build:
       context: .
-      dockerfile: docker/backend/Dockerfile
+      dockerfile: backend/Dockerfile
     container_name: django
     restart: always
     ports:
@@ -37,9 +37,9 @@ services:
       - pgdb
       - nodejs-parcel
     volumes:
-      - bundles:/app/bundles
-      - media:/app/media
-      - static:/app/static
+      - bundles:/app/frontend/bundles
+      - media:/app/frontend/media
+      - static:/app/frontend/static
 
 volumes:
   bundles: null
@@ -53,11 +53,11 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: media
+      device: frontend/media
       o: bind
   static:
     driver: local
     driver_opts:
       type: none
-      device: static
+      device: frontend/static
       o: bind

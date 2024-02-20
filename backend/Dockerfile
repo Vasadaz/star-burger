@@ -1,11 +1,13 @@
 FROM python:3.11.3-alpine
 
-WORKDIR /app
+WORKDIR /app/
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 COPY . .
+
+WORKDIR /app/backend/
 
 RUN apk add git && \
     pip install --upgrade pip && \
