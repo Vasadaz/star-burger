@@ -39,7 +39,7 @@ git clone https://github.com/Vasadaz/star_burger.git
 
 Перейдите в каталог проекта:
 ```shell
-cd star_burger
+cd star_burger/backend/
 ```
 
 [Установите Python](https://www.python.org/), если этого ещё не сделали.
@@ -124,7 +124,7 @@ npm --version
 
 Перейдите в каталог проекта и установите пакеты Node.js:
 ```shell
-cd star_burger
+cd star_burger/frontend
 npm ci --include=dev
 ```
 
@@ -236,8 +236,8 @@ sudo chmod 744 run_deploy.sh
 2.  В корне проекта создать две директории для будущих томов Docker:
     ```shell
     mkdir db_data # Здесь будут храниться данные БД PostgreSQL
-    mkdir media # Здесь будут храниться медиа данные для Django
-    mkdir static # Здесь будут храниться статические(collectstatic) данные для Django
+    mkdir fontend/media # Здесь будут храниться медиа данные для Django
+    mkdir fontend/static # Здесь будут храниться статические(collectstatic) данные для Django
     ```
 
 3. Установить Docker и Docker-Compose.
